@@ -1,0 +1,137 @@
+openapi: 3.0.0
+info:
+  title: Sample spec
+  version: 1.0.0
+
+tags:
+  - name: Users
+    description: User account endpoints
+
+paths:
+
+  /users:
+    get:
+      tags: [ Users ]
+      summary: List users
+
+      parameters:
+        - name: limit
+          in: query
+          description: Limit
+          required: false
+          schema:
+            type: number
+            default: 30
+        - name: offset
+          in: query
+          description: Offser
+          required: false
+          schema:
+            type: number
+            default: 0
+
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchUserResponse'
+
+    post:
+      tags: [ Users ]
+      summary: Create user
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+
+components:
+  schemas:
+    BigDecimal:
+      type: string
+      nullable: false
+  
+    LocalDateTime:
+      type: string
+      nullable: false
+  
+    UserId:
+      type: number
+      format: int64
+      nullable: false
+    UserHand:
+      type: string
+      enum: [ RIGHT, LEFT ]
+    CreateUserRequest:
+      type: object
+      properties:
+        balance:
+          $ref: '#/components/schemas/BigDecimal'
+        birthday:
+          nullable: true
+          allOf:
+           - $ref: '#/components/schemas/LocalDateTime'
+        dominantHand:
+          nullable: true
+          allOf:
+           - $ref: '#/components/schemas/UserHand'
+        firstName:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+          pattern: '[a-zA-Z]*'
+        lastName:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 100
+          pattern: '[a-zA-Z]*'
+  
+    SearchUserResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        totalCount:
+          type: number
+          format: int32
+          nullable: false
+  
+    User:
+      type: object
+      properties:
+        balance:
+          $ref: '#/components/schemas/BigDecimal'
+        birthday:
+          nullable: true
+          allOf:
+           - $ref: '#/components/schemas/LocalDateTime'
+        dominantHand:
+          nullable: true
+          allOf:
+           - $ref: '#/components/schemas/UserHand'
+        firstName:
+          type: string
+          nullable: true
+        id:
+          $ref: '#/components/schemas/UserId'
+        lastName:
+          type: string
+          nullable: true
+  
