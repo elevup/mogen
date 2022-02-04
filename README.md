@@ -59,9 +59,9 @@ val generator: CachedGenerator = TypeScriptGenerator()
     .appendClasses(listOf(Foo::class, Bar::class))
 
 // Access generated definitions
-val classes = generator.generatedTypeAliases
+val classes = generator.generatedClasses
 val enums = generator.generatedEnums
-val types = generator.generatedClasses
+val types = generator.generatedTypeAliases
 ```
 
 ### Type aliases
