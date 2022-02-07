@@ -2,6 +2,7 @@ package com.elevup.languages.swift
 
 import com.elevup.ClassComposer
 import com.elevup.annotation.model.MergedAnnotations
+import com.elevup.languages.swiftDeprecated
 import com.elevup.model.Type
 import com.elevup.util.appendLine
 import com.elevup.util.wrapIntoComment
@@ -32,7 +33,7 @@ class SwiftClassComposer : ClassComposer {
             }
 
         if (annotations.deprecated != null) {
-            appendLine("@available(*, deprecated, message: \"${annotations.deprecated}\")", indent)
+            appendLine(annotations.deprecated.swiftDeprecated(), indent)
         }
 
         appendLine("let $realName: ${formatType(type)}", indent)

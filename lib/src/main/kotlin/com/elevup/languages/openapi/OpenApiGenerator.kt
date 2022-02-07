@@ -41,6 +41,7 @@ class OpenApiGenerator(
                     appendLine("deprecated: true")
                     appendLine("description: DEPRECATED ~ ${annotations.deprecated}")
                 }
+                appendLine("nullable: $nullable")
                 appendLine("items:")
                 val subType = type?.localType ?: Type.Any
                 appendLine(subType.format(MergedAnnotations()).prependIndent(INDENT))

@@ -2,6 +2,7 @@ package com.elevup.languages.ts
 
 import com.elevup.ClassComposer
 import com.elevup.annotation.model.MergedAnnotations
+import com.elevup.languages.typeScriptDeprecated
 import com.elevup.model.Type
 import com.elevup.util.appendLine
 import com.elevup.util.wrapIntoComment
@@ -18,12 +19,18 @@ class TypeScriptClassComposer : ClassComposer {
         annotations: MergedAnnotations,
         indent: String?
     ) {
-        val realName =  annotations.fieldName ?: name
+        val tempName = annotations.fieldName ?: name
+        val realName = if (type.nullable) {
+            "$tempName?"
+        } else {
+            tempName
+        }
+
         listOfNotNull(
             "min: ${annotations.min}".takeIf { annotations.min != null },
             "max: ${annotations.max}".takeIf { annotations.max != null },
             "regex: ${annotations.regex}".takeIf { annotations.regex != null },
-            "@deprecated ${annotations.deprecated}".takeIf { annotations.deprecated != null }
+            annotations.deprecated?.typeScriptDeprecated()
         ).joinToString(separator = "\n")
             .takeIf { it.isNotBlank() }
             ?.wrapIntoComment()

@@ -26,7 +26,7 @@ class DartGenerator(
     override fun Type.format(annotations: MergedAnnotations): String = when (this) {
         is Type.Iterable -> {
             val subType = type?.localType ?: Type.Any
-            if (type?.isMarkedNullable == true) {
+            if (nullable) {
                 "List<${subType.format()}>?"
             } else {
                 "List<${subType.format()}>"

@@ -5,23 +5,26 @@ import kotlin.reflect.KType
 /**
  * In-memory definition of type
  */
-sealed class Type {
+sealed class Type(
+    open val nullable: Boolean
+) {
 
     /**
      * Essentially any homogenous iterable = collection, array, ...
      * Homogenous = can contain children of the same (sub-)type
      */
     data class Iterable(
-        val type: KType?
-    ) : Type()
+        val type: KType?,
+        override val nullable: Boolean,
+    ) : Type(nullable)
 
     /**
      * Reference to another type à la typealias
      */
     data class Reference(
         val name: String,
-        val nullable: Boolean,
-    ) : Type()
+        override val nullable: Boolean,
+    ) : Type(nullable)
 
     /**
      * Primitive class - Int, Double, ...
@@ -30,12 +33,12 @@ sealed class Type {
     data class Primitive(
         val name: String,
         val type: KType? = null,
-        val nullable: Boolean = type?.isMarkedNullable == true,
-    ) : Type()
+        override val nullable: Boolean = type?.isMarkedNullable == true,
+    ) : Type(nullable)
 
     /**
      * Super-type of the universe - Java's Object, Kotlin's Any
      */
-    object Any : Type()
+    object Any : Type(false)
 
 }

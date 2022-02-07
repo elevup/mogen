@@ -6,6 +6,4 @@ data class MergedAnnotations(
     val max: Long? = null,
     val regex: String? = null,
     val deprecated: String? = null,
-    // Mapping <EnumItem, SerializedFieldName>
-    val enumNames: Map<Any, String>? = null,
 )

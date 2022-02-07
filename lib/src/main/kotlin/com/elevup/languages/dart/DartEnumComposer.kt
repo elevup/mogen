@@ -1,8 +1,10 @@
 package com.elevup.languages.dart
 
 import com.elevup.EnumComposer
+import com.elevup.annotation.model.MergedAnnotations
+import com.elevup.languages.dartDeprecated
 import com.elevup.util.appendLine
-import kotlin.reflect.KClass
+import com.elevup.util.wrapIntoComment
 
 class DartEnumComposer : EnumComposer {
 
@@ -10,13 +12,12 @@ class DartEnumComposer : EnumComposer {
         appendLine("enum $typeName {")
     }
 
-    override fun StringBuilder.appendProperties(klass: KClass<*>, klassNames: Map<Any, String>, indent: String?) {
-        klass.java.enumConstants.map { constant: Any ->
-            val fieldName = klassNames[constant] ?: constant
-            "$constant, // = $fieldName"
-        }.forEach {
-            appendLine(it, indent)
+    override fun StringBuilder.appendProperty(name: String, annotations: MergedAnnotations, indent: String?) {
+        val realName = annotations.fieldName ?: name
+        if (annotations.deprecated != null) {
+            appendLine(annotations.deprecated.dartDeprecated().wrapIntoComment(), indent)
         }
+        appendLine("$name, // = $realName", indent)
     }
 
     override fun StringBuilder.appendFooter() {

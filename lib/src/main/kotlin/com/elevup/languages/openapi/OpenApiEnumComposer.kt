@@ -1,26 +1,24 @@
 package com.elevup.languages.openapi
 
 import com.elevup.EnumComposer
-import com.elevup.util.appendLine
-import kotlin.reflect.KClass
+import com.elevup.annotation.model.MergedAnnotations
 
 class OpenApiEnumComposer: EnumComposer {
     
     override fun StringBuilder.appendHeader(typeName: String) {
         appendLine("${typeName}:")
+        appendLine("  type: string")
+        append("  enum: [ ")
     }
 
-    override fun StringBuilder.appendProperties(klass: KClass<*>, klassNames: Map<Any, String>, indent: String?) {
-        val values = klass.java.enumConstants.map { constant ->
-            klassNames[constant] ?: constant.toString()
-        }.joinToString(", ") { it }
-        
-        appendLine("type: string", indent)
-        appendLine("enum: [ $values ]", indent)
+    override fun StringBuilder.appendProperty(name: String, annotations: MergedAnnotations, indent: String?) {
+        append(annotations.fieldName ?: name)
+        append(',')
+        append(' ')
     }
 
     override fun StringBuilder.appendFooter() {
-        
+        append("]")
     }
 
 }

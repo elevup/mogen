@@ -36,6 +36,10 @@ fun KProperty<*>.getAnnotations(parent: KClass<*>): Iterable<Annotation> {
     return kotlinAnnotations + constructorAnnotations + fieldAnnotations
 }
 
+fun Enum<*>.getAnnotations(parent: KClass<*>) : List<Annotation> =
+    parent.java.getField(name).annotations?.toList() ?: emptyList()
+
+
 /**
  * Checks if given type is a function
  */

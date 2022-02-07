@@ -58,7 +58,7 @@ abstract class Generator(
                         else -> arguments.single().type
                     }
 
-                    Type.Iterable(itemType)
+                    Type.Iterable(itemType, nullable = isMarkedNullable)
                 } else if (classifier.isSubclassOf(Map::class)) {
                     // TODO Support maps
                     Type.Any
@@ -110,7 +110,7 @@ abstract class Generator(
     /**
      * Generates class definition from [klass] using [enumGenerator]
      */
-    fun generateClass(klass: KClass<*>): String? {
+    protected fun generateClass(klass: KClass<*>): String? {
         // Object classes cannot be instantiated on the fly so they are gracefully ignored
         if (klass.safeObjectInstance != null) {
             return null
@@ -174,14 +174,20 @@ abstract class Generator(
     /**
      * Generates enum definition from [klass] using [enumGenerator]
      */
-    fun generateEnum(klass: KClass<*>) = with(enumGenerator) {
-        val fieldNames = annotationProcessors.map {
-            it.process(klass.annotations, klass)
-        }.flatten().merge().enumNames ?: emptyMap()
-
+    protected fun generateEnum(klass: KClass<*>) = with(enumGenerator) {
         buildString {
             appendHeader(klass.generatedName)
-            appendProperties(klass, fieldNames, indents.enumProperty)
+            klass.java.enumConstants.forEach {
+                val annotations = (it as Enum<*>).getAnnotations(klass).let { annotations ->
+                    annotationProcessors.map { it.process(annotations, klass) }
+                }.flatten().merge(it)
+
+                appendProperty(
+                    name = it.toString(),
+                    annotations = annotations,
+                    indent = indents.enumProperty,
+                )
+            }
             appendFooter()
         }.trim()
     }
@@ -189,7 +195,7 @@ abstract class Generator(
     /**
      * Generates typealias definition for target language using [typealiasGenerator]
      */
-    fun generateTypealias(alias: Typealias) =
+    protected fun generateTypealias(alias: Typealias) =
         generateTypealias(
             aliasName = alias.localClass.generatedName,
             originalName = alias.name,
@@ -199,7 +205,7 @@ abstract class Generator(
     /**
      * Generates typealias definition for target language using [typealiasGenerator]
      */
-    fun generateTypealias(
+    protected fun generateTypealias(
         aliasName: String,
         originalName: String,
         comment: String? = null,

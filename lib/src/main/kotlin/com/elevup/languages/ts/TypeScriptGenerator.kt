@@ -24,24 +24,14 @@ class TypeScriptGenerator(
     override fun Type.format(annotations: MergedAnnotations): String = when (this) {
         is Type.Iterable -> {
             val subType = type?.localType ?: Type.Any
-            if (type?.isMarkedNullable == true) {
-                "${subType.format()}[] | null"
+            if (subType.nullable) {
+                "(${subType.format()} | null)[]"
             } else {
                 "${subType.format()}[]"
             }
         }
-        is Type.Primitive -> {
-            if (nullable) {
-                "$name | null"
-            } else {
-                name
-            }
-        }
-        is Type.Reference -> if (nullable) {
-            "$name | null"
-        } else {
-            name
-        }
+        is Type.Primitive -> name
+        is Type.Reference -> name
         Type.Any -> "any"
     }
 

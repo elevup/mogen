@@ -1,6 +1,6 @@
 package com.elevup
 
-import kotlin.reflect.KClass
+import com.elevup.annotation.model.MergedAnnotations
 
 /**
  * Helps compose string that will eventually represent enum declaration
@@ -16,17 +16,14 @@ interface EnumComposer {
     fun StringBuilder.appendHeader(typeName: String)
 
     /**
-     * Appends one member of enum. Supports serialised name using [klassNames].
+     * Appends one member of enum.
      *
-     * Assume kotlin enum: `enum class Foo { BAR }` where `Foo.BAR` is serialised as `Bar` then [klassNames]
-     * must contain entry `Foo.BAR to "Bar"`.
-     *
-     * @param klass - original Kotlin klass
-     * @param klassNames - mapping from enum constant instance to serialised name
+     * @param name - property name in JVM
+     * @param annotations - enum property-bound annotations
      */
-    fun StringBuilder.appendProperties(
-        klass: KClass<*>,
-        klassNames: Map<Any, String> = emptyMap(),
+    fun StringBuilder.appendProperty(
+        name: String,
+        annotations: MergedAnnotations = MergedAnnotations(),
         indent: String? = null
     )
 

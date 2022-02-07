@@ -2,6 +2,7 @@ package com.elevup.languages.dart
 
 import com.elevup.ClassComposer
 import com.elevup.annotation.model.MergedAnnotations
+import com.elevup.languages.dartDeprecated
 import com.elevup.model.Type
 import com.elevup.util.appendLine
 import com.elevup.util.wrapIntoComment
@@ -23,7 +24,7 @@ class DartClassComposer : ClassComposer {
             "min: ${annotations.min}".takeIf { annotations.min != null },
             "max: ${annotations.max}".takeIf { annotations.max != null },
             "regex: ${annotations.regex}".takeIf { annotations.regex != null },
-            "@deprecated ${annotations.deprecated}".takeIf { annotations.deprecated != null }
+            annotations.deprecated?.dartDeprecated()
         ).joinToString(separator = "\n")
             .takeIf { it.isNotBlank() }
             ?.wrapIntoComment()
