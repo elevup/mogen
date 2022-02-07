@@ -38,6 +38,15 @@ Unsupported features:
 Have a look at `sample/src/main` where in `kotlin` folder are source files and in `resources` folder 
 you can find generated output.
 
+## Latest version
+
+Library is available on Maven Central.
+
+![Latest version](https://img.shields.io/maven-central/v/com.elevup/mogen "Latest lib version")
+```groovy
+implementation 'com.elevup:mogen:$version'
+```
+
 ## How to use
 First you need to gather all classes that need to be transformed. Simple create list of them.
 
