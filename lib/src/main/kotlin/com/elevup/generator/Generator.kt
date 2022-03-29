@@ -221,7 +221,7 @@ abstract class Generator(
      */
     private fun KType.getTypealias(): String? =
         TYPEALIAS_REGEX.find(toString())?.let {
-            if (it.groups.size == 3) {
+            if (it.groups.size == 5) {
                 val aliasName = it.groups[1]!!.value.split(".").last()
                 aliasName
             } else null
@@ -239,6 +239,6 @@ abstract class Generator(
          * Regex that matches trivial Typealiases
          * Example: `com.elevup.UserId /* = kotlin.String */`
          */
-        private val TYPEALIAS_REGEX = "^([a-zA-Z0-9.]+) \\/\\* = ([a-zA-Z0-9<>.]+) \\*\\/".toRegex()
+        private val TYPEALIAS_REGEX = "^([a-zA-Z0-9.]+)(\\?)? \\/\\* = ([a-zA-Z0-9<>.]+)(\\?)? \\*\\/".toRegex()
     }
 }

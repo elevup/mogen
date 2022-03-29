@@ -96,4 +96,20 @@ class TypescriptTests : StringSpec({
             )
         )
     }
+
+    "optional type" {
+        getGenerator().appendAndExpectOutput(
+            clazz = ClassWithOptionalType::class,
+            classes = Types(
+                """
+                export interface ClassWithOptionalType {
+                  id?: ClassWithOptionalTypeId;
+                }
+                """.trimIndent()
+            ),
+            types = Types(
+                "export type ClassWithOptionalTypeId = number"
+            )
+        )
+    }
 })

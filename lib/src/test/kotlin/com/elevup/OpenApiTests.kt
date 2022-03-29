@@ -140,4 +140,29 @@ class OpenApiTests : StringSpec({
             )
         )
     }
+
+    "optional type" {
+        getGenerator().appendAndExpectOutput(
+            clazz = ClassWithOptionalType::class,
+            classes = Types(
+                """
+                ClassWithOptionalType:
+                  type: object
+                  properties:
+                    id:
+                      nullable: true
+                      allOf:
+                       - ${dollar}ref: '#/components/schemas/ClassWithOptionalTypeId'
+                """.trimIndent()
+            ),
+            types = Types(
+                """
+                ClassWithOptionalTypeId:
+                  type: number
+                  format: int64
+                  nullable: false
+                """.trimIndent()
+            )
+        )
+    }
 })

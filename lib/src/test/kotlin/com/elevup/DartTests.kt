@@ -128,4 +128,25 @@ class DartTests : StringSpec({
             )
         )
     }
+
+    "optional type" {
+        getGenerator().appendAndExpectOutput(
+            clazz = ClassWithOptionalType::class,
+            classes = Types(
+                """
+                class ClassWithOptionalType {
+                  final ClassWithOptionalTypeId? id;
+
+                  ClassWithOptionalType({
+                    required this.id,
+                  });
+
+                }
+                """.trimIndent()
+            ),
+            types = Types(
+                "typedef ClassWithOptionalTypeId = int"
+            )
+        )
+    }
 })

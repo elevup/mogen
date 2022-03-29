@@ -97,4 +97,20 @@ class SwiftTests : StringSpec({
             )
         )
     }
+
+    "optional type" {
+        getGenerator().appendAndExpectOutput(
+            clazz = ClassWithOptionalType::class,
+            classes = Types(
+                """
+                struct ClassWithOptionalType: Codable {
+                  let id: ClassWithOptionalTypeId?
+                }
+                """.trimIndent()
+            ),
+            types = Types(
+                "typealias ClassWithOptionalTypeId = Int"
+            )
+        )
+    }
 })
