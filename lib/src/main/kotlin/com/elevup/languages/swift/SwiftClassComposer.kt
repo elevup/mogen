@@ -3,13 +3,18 @@ package com.elevup.languages.swift
 import com.elevup.ClassComposer
 import com.elevup.annotation.model.MergedAnnotations
 import com.elevup.languages.swiftDeprecated
+import com.elevup.model.ComposerConfig
 import com.elevup.model.Type
+import com.elevup.model.formatName
 import com.elevup.util.appendLine
 import com.elevup.util.wrapIntoComment
 
-class SwiftClassComposer : ClassComposer {
+class SwiftClassComposer(
+    override val config: ComposerConfig
+) : ClassComposer {
+
     override fun StringBuilder.appendHeader(typeName: String) {
-        appendLine("struct $typeName: Codable {")
+        appendLine("struct ${config.formatName(typeName)}: Codable {")
     }
 
     override fun StringBuilder.appendProperty(
@@ -19,7 +24,7 @@ class SwiftClassComposer : ClassComposer {
         annotations: MergedAnnotations,
         indent: String?
     ) {
-        val realName =  annotations.fieldName ?: name
+        val realName = annotations.fieldName ?: name
 
         listOfNotNull(
             "min: ${annotations.min}".takeIf { annotations.min != null },

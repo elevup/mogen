@@ -3,13 +3,18 @@ package com.elevup.languages.ts
 import com.elevup.ClassComposer
 import com.elevup.annotation.model.MergedAnnotations
 import com.elevup.languages.typeScriptDeprecated
+import com.elevup.model.ComposerConfig
 import com.elevup.model.Type
+import com.elevup.model.formatName
 import com.elevup.util.appendLine
 import com.elevup.util.wrapIntoComment
 
-class TypeScriptClassComposer : ClassComposer {
+class TypeScriptClassComposer(
+    override val config: ComposerConfig
+) : ClassComposer {
+
     override fun StringBuilder.appendHeader(typeName: String) {
-        appendLine("export interface $typeName {")
+        appendLine("export interface ${config.formatName(typeName)} {")
     }
 
     override fun StringBuilder.appendProperty(

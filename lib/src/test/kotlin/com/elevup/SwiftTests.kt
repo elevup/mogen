@@ -2,13 +2,18 @@ package com.elevup
 
 import com.elevup.languages.swift.SwiftGenerator
 import com.elevup.languages.ts.TypeScriptGenerator
+import com.elevup.model.ComposerConfig
 import com.elevup.model.GenericIndents
 import com.elevup.models.*
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
 class SwiftTests : StringSpec({
-    fun getGenerator() = SwiftGenerator(annotationProcessors = emptyList(), indents = GenericIndents())
+    fun getGenerator(config: ComposerConfig = ComposerConfig()) = SwiftGenerator(
+        annotationProcessors = emptyList(),
+        indents = GenericIndents(),
+        config = config
+    )
 
 
     "empty classes should me omitted" {
@@ -75,6 +80,25 @@ class SwiftTests : StringSpec({
                 """
                 struct Parent: Codable {
                   let child: ParentChild
+                  let id: Int
+                }
+                """.trimIndent()
+            )
+        )
+    }
+
+    "nested class with prefixes and postfixes" {
+        getGenerator(config = ComposerConfig(typeNamePrefix = "X", typeNamePostfix = "_v2")).appendAndExpectOutput(
+            clazz = Parent::class,
+            classes = Types(
+                """
+                struct XParentChild_v2: Codable {
+                  let id: String
+                }
+                """.trimIndent(),
+                """
+                struct XParent_v2: Codable {
+                  let child: XParentChild_v2
                   let id: Int
                 }
                 """.trimIndent()

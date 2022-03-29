@@ -2,12 +2,17 @@ package com.elevup.languages.openapi
 
 import com.elevup.ClassComposer
 import com.elevup.annotation.model.MergedAnnotations
+import com.elevup.model.ComposerConfig
 import com.elevup.model.Type
+import com.elevup.model.formatName
 import com.elevup.util.appendLine
 
-class OpenApiClassComposer : ClassComposer {
+class OpenApiClassComposer(
+    override val config: ComposerConfig
+) : ClassComposer {
+
     override fun StringBuilder.appendHeader(typeName: String) {
-        appendLine("${typeName}:")
+        appendLine("${config.formatName(typeName)}:")
         appendLine("  type: object")
         appendLine("  properties:")
     }

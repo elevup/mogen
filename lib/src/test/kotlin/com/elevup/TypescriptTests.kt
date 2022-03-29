@@ -1,13 +1,18 @@
 package com.elevup
 
 import com.elevup.languages.ts.TypeScriptGenerator
+import com.elevup.model.ComposerConfig
 import com.elevup.model.GenericIndents
 import com.elevup.models.*
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
 class TypescriptTests : StringSpec({
-    fun getGenerator() = TypeScriptGenerator(annotationProcessors = emptyList(), indents = GenericIndents())
+    fun getGenerator(config: ComposerConfig = ComposerConfig()) = TypeScriptGenerator(
+        annotationProcessors = emptyList(),
+        indents = GenericIndents(),
+        config = config
+    )
 
 
     "empty classes should me omitted" {
@@ -74,6 +79,25 @@ class TypescriptTests : StringSpec({
                 """
                 export interface Parent {
                   child: ParentChild;
+                  id: number;
+                }
+                """.trimIndent()
+            )
+        )
+    }
+
+    "nested class with prefixes and postfixes" {
+        getGenerator(config = ComposerConfig(typeNamePrefix = "X", typeNamePostfix = "_v2")).appendAndExpectOutput(
+            clazz = Parent::class,
+            classes = Types(
+                """
+                export interface XParentChild_v2 {
+                  id: string;
+                }
+                """.trimIndent(),
+                """
+                export interface XParent_v2 {
+                  child: XParentChild_v2;
                   id: number;
                 }
                 """.trimIndent()

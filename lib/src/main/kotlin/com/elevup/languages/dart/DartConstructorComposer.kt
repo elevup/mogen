@@ -2,12 +2,17 @@ package com.elevup.languages.dart
 
 import com.elevup.ConstructorComposer
 import com.elevup.annotation.model.MergedAnnotations
+import com.elevup.model.ComposerConfig
 import com.elevup.model.Type
+import com.elevup.model.formatName
 import com.elevup.util.appendLine
 
-class DartConstructorComposer : ConstructorComposer {
+class DartConstructorComposer(
+    override val config: ComposerConfig
+) : ConstructorComposer {
+
     override fun StringBuilder.appendHeader(typeName: String, indent: String?) {
-        appendLine("$typeName({", indent)
+        appendLine("${config.formatName(typeName)}({", indent)
     }
 
     override fun StringBuilder.appendProperty(

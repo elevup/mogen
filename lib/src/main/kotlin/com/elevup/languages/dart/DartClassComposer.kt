@@ -3,13 +3,18 @@ package com.elevup.languages.dart
 import com.elevup.ClassComposer
 import com.elevup.annotation.model.MergedAnnotations
 import com.elevup.languages.dartDeprecated
+import com.elevup.model.ComposerConfig
 import com.elevup.model.Type
+import com.elevup.model.formatName
 import com.elevup.util.appendLine
 import com.elevup.util.wrapIntoComment
 
-class DartClassComposer : ClassComposer {
+class DartClassComposer(
+    override val config: ComposerConfig
+) : ClassComposer {
+
     override fun StringBuilder.appendHeader(typeName: String) {
-        appendLine("class $typeName {")
+        appendLine("class ${config.formatName(typeName)} {")
     }
 
     override fun StringBuilder.appendProperty(

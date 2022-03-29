@@ -6,7 +6,7 @@ import com.elevup.model.Type
 /**
  * Helps compose string that will eventually represent type's *default* constructor declaration
  */
-interface ConstructorComposer {
+interface ConstructorComposer : Composer {
 
     /**
      * Appends constructor header declaration.

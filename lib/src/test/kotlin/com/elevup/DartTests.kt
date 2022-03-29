@@ -3,13 +3,18 @@ package com.elevup
 import com.elevup.languages.dart.DartGenerator
 import com.elevup.languages.swift.SwiftGenerator
 import com.elevup.languages.ts.TypeScriptGenerator
+import com.elevup.model.ComposerConfig
 import com.elevup.model.GenericIndents
 import com.elevup.models.*
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
 class DartTests : StringSpec({
-    fun getGenerator() = DartGenerator(annotationProcessors = emptyList(), indents = GenericIndents())
+    fun getGenerator(config: ComposerConfig = ComposerConfig()) = DartGenerator(
+        annotationProcessors = emptyList(),
+        indents = GenericIndents(),
+        config = config
+    )
 
 
     "empty classes should me omitted" {
@@ -99,6 +104,36 @@ class DartTests : StringSpec({
                     required this.id,
                   });
                 
+                }
+                """.trimIndent()
+            )
+        )
+    }
+
+    "nested class with prefixes and postfixes" {
+        getGenerator(config = ComposerConfig(typeNamePrefix = "X", typeNamePostfix = "_v2")).appendAndExpectOutput(
+            clazz = Parent::class,
+            classes = Types(
+                """
+                class XParentChild_v2 {
+                  final String id;
+
+                  XParentChild_v2({
+                    required this.id,
+                  });
+
+                }
+                """.trimIndent(),
+                """
+                class XParent_v2 {
+                  final XParentChild_v2 child;
+                  final int id;
+
+                  XParent_v2({
+                    required this.child,
+                    required this.id,
+                  });
+
                 }
                 """.trimIndent()
             )

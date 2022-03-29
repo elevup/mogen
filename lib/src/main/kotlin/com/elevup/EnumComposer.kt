@@ -5,7 +5,7 @@ import com.elevup.annotation.model.MergedAnnotations
 /**
  * Helps compose string that will eventually represent enum declaration
  */
-interface EnumComposer {
+interface EnumComposer : Composer {
 
     /**
      * Appends enum header declaration.

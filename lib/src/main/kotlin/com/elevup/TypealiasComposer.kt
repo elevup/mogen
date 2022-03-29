@@ -3,7 +3,7 @@ package com.elevup
 /**
  * Helps compose string that will eventually represent typealias declaration
  */
-interface TypealiasComposer {
+interface TypealiasComposer : Composer {
 
     /**
      * Appends typealias declaration to builder

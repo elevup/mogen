@@ -2,11 +2,15 @@ package com.elevup.languages.openapi
 
 import com.elevup.EnumComposer
 import com.elevup.annotation.model.MergedAnnotations
+import com.elevup.model.ComposerConfig
+import com.elevup.model.formatName
 
-class OpenApiEnumComposer: EnumComposer {
+class OpenApiEnumComposer(
+    override val config: ComposerConfig
+): EnumComposer {
     
     override fun StringBuilder.appendHeader(typeName: String) {
-        appendLine("${typeName}:")
+        appendLine("${config.formatName(typeName)}:")
         appendLine("  type: string")
         append("  enum: [ ")
     }

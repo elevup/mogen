@@ -3,9 +3,7 @@ package com.elevup.languages.openapi
 import com.elevup.annotation.AnnotationProcessor
 import com.elevup.annotation.model.MergedAnnotations
 import com.elevup.generator.CachedGenerator
-import com.elevup.model.Indents
-import com.elevup.model.OpenApiIndents
-import com.elevup.model.Type
+import com.elevup.model.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KType
@@ -13,13 +11,14 @@ import kotlin.reflect.jvm.jvmName
 
 class OpenApiGenerator(
     override val annotationProcessors: List<AnnotationProcessor> = emptyList(),
-    indents: Indents = OpenApiIndents()
+    private val config: ComposerConfig = ComposerConfig(),
+    indents: Indents = OpenApiIndents(),
 ) : CachedGenerator(
     annotationProcessors,
     indents,
-    OpenApiClassComposer(),
-    OpenApiEnumComposer(),
-    OpenApiTypealiasComposer(),
+    OpenApiClassComposer(config = config),
+    OpenApiEnumComposer(config = config),
+    OpenApiTypealiasComposer(config = config),
 ) {
 
     override val KClass<*>.generatedName
@@ -63,13 +62,13 @@ class OpenApiGenerator(
                 if (annotations.deprecated == null) {
                     if (nullable) {
                         appendLine("allOf:")
-                        appendLine(" - \$ref: '#/components/schemas/${name}'")
+                        appendLine(" - \$ref: '#/components/schemas/${config.formatName(name)}'")
                     } else {
-                        appendLine("\$ref: '#/components/schemas/${name}'")
+                        appendLine("\$ref: '#/components/schemas/${config.formatName(name)}'")
                     }
                 } else {
                     appendLine("allOf:")
-                    appendLine(" - \$ref: '#/components/schemas/${name}'")
+                    appendLine(" - \$ref: '#/components/schemas/${config.formatName(name)}'")
                     appendLine(" - deprecated: true")
                     appendLine(" - description: DEPRECATED ~ ${annotations.deprecated}")
                 }

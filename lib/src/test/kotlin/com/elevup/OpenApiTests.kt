@@ -2,6 +2,7 @@ package com.elevup
 
 import com.elevup.languages.openapi.OpenApiGenerator
 import com.elevup.languages.ts.TypeScriptGenerator
+import com.elevup.model.ComposerConfig
 import com.elevup.model.GenericIndents
 import com.elevup.model.OpenApiIndents
 import com.elevup.models.*
@@ -10,7 +11,11 @@ import io.kotest.matchers.shouldBe
 
 class OpenApiTests : StringSpec({
     val dollar = "$"
-    fun getGenerator() = OpenApiGenerator(annotationProcessors = emptyList(), indents = OpenApiIndents())
+    fun getGenerator(config: ComposerConfig = ComposerConfig()) = OpenApiGenerator(
+        annotationProcessors = emptyList(),
+        indents = OpenApiIndents(),
+        config = config,
+    )
 
 
     "empty classes should me omitted" {
@@ -95,6 +100,33 @@ class OpenApiTests : StringSpec({
                   properties:
                     child:
                       ${dollar}ref: '#/components/schemas/ParentChild'
+                    id:
+                      type: number
+                      format: int64
+                      nullable: false
+                """.trimIndent()
+            )
+        )
+    }
+
+    "nested class with prefixes and postfixes" {
+        getGenerator(config = ComposerConfig(typeNamePrefix = "X", typeNamePostfix = "_v2")).appendAndExpectOutput(
+            clazz = Parent::class,
+            classes = Types(
+                """
+                XParentChild_v2:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      nullable: false
+                """.trimIndent(),
+                """
+                XParent_v2:
+                  type: object
+                  properties:
+                    child:
+                      ${dollar}ref: '#/components/schemas/XParentChild_v2'
                     id:
                       type: number
                       format: int64

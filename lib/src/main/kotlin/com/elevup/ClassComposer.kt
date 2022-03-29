@@ -6,7 +6,7 @@ import com.elevup.model.Type
 /**
  * Helps compose string that will eventually represent class that is not an enum declaration
  */
-interface ClassComposer {
+interface ClassComposer : Composer {
 
     /**
      * Appends class header declaration.

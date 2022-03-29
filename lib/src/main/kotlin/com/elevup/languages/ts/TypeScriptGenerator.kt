@@ -3,22 +3,21 @@ package com.elevup.languages.ts
 import com.elevup.annotation.AnnotationProcessor
 import com.elevup.annotation.model.MergedAnnotations
 import com.elevup.generator.CachedGenerator
-import com.elevup.model.GenericIndents
-import com.elevup.model.Indents
-import com.elevup.model.Type
+import com.elevup.model.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.jvm.jvmName
 
 class TypeScriptGenerator(
     override val annotationProcessors: List<AnnotationProcessor> = emptyList(),
+    private val config: ComposerConfig = ComposerConfig(),
     indents: Indents = GenericIndents(),
 ) : CachedGenerator(
     annotationProcessors,
     indents,
-    TypeScriptClassComposer(),
-    TypescriptEnumComposer(),
-    TypescriptTypealiasComposer()
+    TypeScriptClassComposer(config = config),
+    TypescriptEnumComposer(config = config),
+    TypescriptTypealiasComposer(config = config)
 ) {
 
     override fun Type.format(annotations: MergedAnnotations): String = when (this) {
@@ -31,7 +30,7 @@ class TypeScriptGenerator(
             }
         }
         is Type.Primitive -> name
-        is Type.Reference -> name
+        is Type.Reference -> config.formatName(name)
         Type.Any -> "any"
     }
 

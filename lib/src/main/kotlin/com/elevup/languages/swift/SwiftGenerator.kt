@@ -3,22 +3,21 @@ package com.elevup.languages.swift
 import com.elevup.annotation.AnnotationProcessor
 import com.elevup.annotation.model.MergedAnnotations
 import com.elevup.generator.CachedGenerator
-import com.elevup.model.GenericIndents
-import com.elevup.model.Indents
-import com.elevup.model.Type
+import com.elevup.model.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.jvm.jvmName
 
 class SwiftGenerator(
     override val annotationProcessors: List<AnnotationProcessor> = emptyList(),
-    indents: Indents = GenericIndents()
+    private val config: ComposerConfig = ComposerConfig(),
+    indents: Indents = GenericIndents(),
 ) : CachedGenerator(
     annotationProcessors,
     indents,
-    SwiftClassComposer(),
-    SwiftEnumComposer(),
-    SwiftTypealiasComposer()
+    SwiftClassComposer(config = config),
+    SwiftEnumComposer(config = config),
+    SwiftTypealiasComposer(config = config)
 ) {
 
 
@@ -39,9 +38,9 @@ class SwiftGenerator(
             }
         }
         is Type.Reference -> if (nullable) {
-            "$name?"
+            "${config.formatName(name)}?"
         } else {
-            name
+            config.formatName(name)
         }
         Type.Any -> "Any"
     }
