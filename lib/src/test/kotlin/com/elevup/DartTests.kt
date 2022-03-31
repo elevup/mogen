@@ -61,7 +61,7 @@ class DartTests : StringSpec({
                 """.trimIndent()
             ),
             types = Types(
-                "typedef UserId = int"
+                "typedef UserId = int;"
             )
         )
     }
@@ -180,7 +180,7 @@ class DartTests : StringSpec({
                 """.trimIndent()
             ),
             types = Types(
-                "typedef ClassWithOptionalTypeId = int"
+                "typedef ClassWithOptionalTypeId = int;"
             )
         )
     }
