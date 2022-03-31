@@ -49,7 +49,7 @@ class DartGenerator(
 
     override val KClassifier.primitiveType
         get() = when (this) {
-            Boolean::class -> "boolean"
+            Boolean::class -> "bool"
             String::class, Char::class -> "String"
             Int::class,
             Long::class,

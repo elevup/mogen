@@ -12,6 +12,6 @@ class DartTypealiasComposer(
 
     override fun StringBuilder.appendTypealias(aliasName: String, originalName: String, comment: String?, indent: String?) {
         comment?.let { appendLine(it.wrapIntoComment()) }
-        appendLine("typedef ${config.formatName(aliasName)} = $originalName", indent)
+        appendLine("typedef ${config.formatName(aliasName)} = $originalName;", indent)
     }
 }
