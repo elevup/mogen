@@ -1,10 +1,10 @@
 package com.elevup.annotation
 
 import com.elevup.annotation.model.ProcessedAnnotation
-import javax.validation.constraints.Max
-import javax.validation.constraints.Min
-import javax.validation.constraints.Pattern
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 import kotlin.reflect.KClass
 
 /**
