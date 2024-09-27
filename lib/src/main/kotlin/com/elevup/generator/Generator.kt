@@ -7,6 +7,7 @@ import com.elevup.TypealiasComposer
 import com.elevup.annotation.AnnotationProcessor
 import com.elevup.annotation.model.MergedAnnotations
 import com.elevup.annotation.model.merge
+import com.elevup.generator.annotation.GeneratorIgnore
 import com.elevup.model.Indents
 import com.elevup.model.Type
 import com.elevup.model.Typealias
@@ -112,7 +113,7 @@ abstract class Generator(
      */
     protected fun generateClass(klass: KClass<*>): String? {
         // Object classes cannot be instantiated on the fly so they are gracefully ignored
-        if (klass.safeObjectInstance != null) {
+        if (klass.safeObjectInstance != null || klass.annotations.any { it is GeneratorIgnore }) {
             return null
         }
 
