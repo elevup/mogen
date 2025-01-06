@@ -1,20 +1,28 @@
 plugins {
     application
     id("com.vanniktech.maven.publish")
+    id("org.jetbrains.kotlin.jvm")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+    jvmToolchain(17)
+}
+
+sourceSets {
+    with(main.get()) {
+        kotlin { srcDir("src") }
+        java { srcDir("src") }
+        resources { srcDir("resources") }
+    }
+
+    with(test.get()) {
+        kotlin { srcDir("test") }
+        java { srcDirs("test") }
+        resources { srcDir("testresources") }
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
@@ -23,6 +31,6 @@ dependencies {
     implementation("jakarta.validation:jakarta.validation-api:3.1.0-M1")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.16.1")
 
-    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.2.1")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:5.2.1")
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
 }

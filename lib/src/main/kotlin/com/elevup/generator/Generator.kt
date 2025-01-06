@@ -15,6 +15,7 @@ import com.elevup.util.appendLine
 import com.elevup.util.exportableMemberProperties
 import com.elevup.util.getAnnotations
 import com.elevup.util.safeObjectInstance
+import kotlin.collections.any
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KProperty1
@@ -118,11 +119,12 @@ abstract class Generator(
         }
 
         return with(classGenerator) {
-            val rawProperties = klass.exportableMemberProperties.map { property ->
+            val rawProperties = klass.exportableMemberProperties.mapNotNull { property ->
+                val annotations = property.getAnnotations(klass)
+                if (annotations.any { it is GeneratorIgnore }) return@mapNotNull null
+
                 TempProperty(
-                    annotations = property.getAnnotations(klass).let { annotations ->
-                        annotationProcessors.map { it.process(annotations, klass) }
-                    }.flatten().merge(),
+                    annotations = annotationProcessors.map { it.process(annotations, klass) }.flatten().merge(),
                     localType = property.returnType.localType,
                     property = property
                 )
@@ -179,15 +181,14 @@ abstract class Generator(
         buildString {
             appendHeader(klass.generatedName)
             klass.java.enumConstants.forEach {
-                val annotations = (it as Enum<*>).getAnnotations(klass).let { annotations ->
-                    annotationProcessors.map { it.process(annotations, klass) }
-                }.flatten().merge(it)
-
-                appendProperty(
-                    name = it.toString(),
-                    annotations = annotations,
-                    indent = indents.enumProperty,
-                )
+                val annotations = (it as Enum<*>).getAnnotations(klass)
+                if (annotations.none { it is GeneratorIgnore }) {
+                    appendProperty(
+                        name = it.toString(),
+                        annotations = annotationProcessors.map { it.process(annotations, klass) }.flatten().merge(it),
+                        indent = indents.enumProperty,
+                    )
+                }
             }
             appendFooter()
         }.trim()
