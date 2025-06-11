@@ -57,10 +57,19 @@ abstract class Generator(
                         DoubleArray::class -> Double::class.createType(nullable = false)
 
                         // Class container types (they use generics)
-                        else -> arguments.single().type
+                        else -> arguments.singleOrNull()?.type
                     }
 
-                    Type.Iterable(itemType, nullable = isMarkedNullable)
+                    if (itemType != null) {
+                        Type.Iterable(itemType, nullable = isMarkedNullable)
+                    } else if (arguments.isEmpty()) {
+                        // Iterable without arguments
+                        onClass(klass = classifier)
+                        Type.Reference(classifier.generatedName, nullable = isMarkedNullable)
+                    } else {
+                        // TODO Support iterables with multiple arguments
+                        Type.Any
+                    }
                 } else if (classifier.isSubclassOf(Map::class)) {
                     // TODO Support maps
                     Type.Any
