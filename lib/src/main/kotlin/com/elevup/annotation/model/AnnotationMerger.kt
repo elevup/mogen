@@ -1,12 +1,12 @@
 package com.elevup.annotation.model
 
 fun List<ProcessedAnnotation>.merge(enumConstant: Any? = null): MergedAnnotations {
-    val names = filterIsInstance(ProcessedAnnotation.FieldName::class.java)
-    val min = filterIsInstance(ProcessedAnnotation.Minimum::class.java)
-    val max = filterIsInstance(ProcessedAnnotation.Maximum::class.java)
-    val regexes = filterIsInstance(ProcessedAnnotation.Regex::class.java)
-    val deprecated = filterIsInstance(ProcessedAnnotation.Deprecated::class.java)
-    val enumNames = filterIsInstance(ProcessedAnnotation.EnumNames::class.java)
+    val names = filterIsInstance<ProcessedAnnotation.FieldName>().distinct()
+    val min = filterIsInstance<ProcessedAnnotation.Minimum>().distinct()
+    val max = filterIsInstance<ProcessedAnnotation.Maximum>().distinct()
+    val regexes = filterIsInstance<ProcessedAnnotation.Regex>().distinct()
+    val deprecated = filterIsInstance<ProcessedAnnotation.Deprecated>().distinct()
+    val enumNames = filterIsInstance<ProcessedAnnotation.EnumNames>().distinct()
 
     if (names.size > 1) throw IllegalStateException("Multiple 'fieldName' candidates -> $names")
     if (min.size > 1) throw IllegalStateException("Multiple 'min' candidates -> $min")

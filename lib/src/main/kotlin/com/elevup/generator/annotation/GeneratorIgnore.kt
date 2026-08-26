@@ -1,6 +1,6 @@
 package com.elevup.generator.annotation
 
 /**
- * Annotate type in order to ignore it in generated output
+ * Annotate a type to ignore it in the generated output
  */
 annotation class GeneratorIgnore

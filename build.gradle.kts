@@ -1,5 +1,5 @@
 buildscript {
-    val kotlin_version = "2.1.0"
+    val kotlin_version = "2.4.10"
 
     repositories {
         mavenCentral()
@@ -8,8 +8,8 @@ buildscript {
 
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.9.20")
-        classpath("com.vanniktech:gradle-maven-publish-plugin:0.18.0")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:2.2.0")
+        classpath("com.vanniktech:gradle-maven-publish-plugin:0.37.0")
     }
 }
 

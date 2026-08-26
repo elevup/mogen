@@ -4,8 +4,8 @@ import com.elevup.models.User
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import javax.validation.constraints.Pattern
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 
 data class CreateUserRequest(
     @Size(min = 1, max = 100)

@@ -28,16 +28,16 @@ val <T : Any> KClass<T>.safeObjectInstance: T?
  */
 fun KProperty<*>.getAnnotations(parent: KClass<*>): Iterable<Annotation> {
     val kotlinAnnotations = annotations
-    val fieldAnnotations = javaField?.annotations ?: emptyArray()
+    val fieldAnnotations = javaField?.annotations?.toList() ?: emptyList()
     val constructorAnnotations = parent.constructors.mapNotNull {
         it.parameters.firstOrNull { it.name == name && it.annotations.isNotEmpty() }?.annotations
     }.flatten()
 
-    return kotlinAnnotations + constructorAnnotations + fieldAnnotations
+    return (kotlinAnnotations + constructorAnnotations + fieldAnnotations).distinct()
 }
 
 fun Enum<*>.getAnnotations(parent: KClass<*>) : List<Annotation> =
-    parent.java.getField(name).annotations?.toList() ?: emptyList()
+    parent.java.getField(name).annotations.toList()
 
 
 /**

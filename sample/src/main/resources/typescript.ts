@@ -21,20 +21,20 @@ export enum UserHand {
  */
 export interface CreateUserRequest {
   balance: BigDecimal;
-  birthday: LocalDateTime | null;
-  dominantHand: UserHand | null;
+  birthday?: LocalDateTime;
+  dominantHand?: UserHand;
   /**
    * min: 1
    * max: 100
    * regex: [a-zA-Z]*
    */
-  firstName: string | null;
+  firstName?: string;
   /**
    * min: 1
    * max: 100
    * regex: [a-zA-Z]*
    */
-  lastName: string | null;
+  lastName?: string;
 }
 
 export interface SearchUserResponse {
@@ -44,9 +44,9 @@ export interface SearchUserResponse {
 
 export interface User {
   balance: BigDecimal;
-  birthday: LocalDateTime | null;
-  dominantHand: UserHand | null;
-  firstName: string | null;
+  birthday?: LocalDateTime;
+  dominantHand?: UserHand;
+  firstName?: string;
   id: UserId;
-  lastName: string | null;
+  lastName?: string;
 }

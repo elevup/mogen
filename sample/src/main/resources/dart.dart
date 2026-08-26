@@ -1,12 +1,12 @@
 /**
  * TYPES
  */
-typedef BigDecimal = String
+typedef BigDecimal = String;
 /**
  * yyyy-MM-dd'T'HH:mm:ss'Z'
  */
-typedef LocalDateTime = String
-typedef UserId = int
+typedef LocalDateTime = String;
+typedef UserId = int;
 
 /**
  * ENUMS

@@ -27,10 +27,10 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.0")
-    implementation("jakarta.validation:jakarta.validation-api:3.1.0-M1")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.16.1")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.4.10")
+    implementation("jakarta.validation:jakarta.validation-api:3.1.1")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.19.0")
 
-    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
-    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+    testImplementation("io.kotest:kotest-runner-junit5:6.2.4")
+    testImplementation("io.kotest:kotest-assertions-core:6.2.4")
 }

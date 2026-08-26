@@ -11,6 +11,7 @@ import com.elevup.model.Typealias
 import com.elevup.printer.GenericPrinter
 import com.elevup.printer.OpenApiPrinter
 import org.reflections.Reflections
+import org.reflections.scanners.Scanners
 import org.reflections.scanners.SubTypesScanner
 import org.reflections.util.ClasspathHelper
 import org.reflections.util.ConfigurationBuilder
@@ -30,11 +31,11 @@ fun main() {
     val reflections = Reflections(
         ConfigurationBuilder()
             .filterInputsBy(FilterBuilder().includePackage(sourcePackage))
-            .setUrls(ClasspathHelper.forPackage(sourcePackage))
-            .setScanners(SubTypesScanner(false))
+            .forPackages(sourcePackage)
+            .setScanners(Scanners.SubTypes.filterResultsBy { true })
     )
 
-    val typeList = reflections.getSubTypesOf(Object::class.java) + reflections.getSubTypesOf(Enum::class.java)
+    val typeList = reflections.getSubTypesOf(Any::class.java) + reflections.getSubTypesOf(Enum::class.java)
     val classes = typeList.map { c -> c.kotlin }.distinct()
 
     generateDart(classes)
