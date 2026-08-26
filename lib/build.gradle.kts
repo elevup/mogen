@@ -1,7 +1,7 @@
 plugins {
     application
-    id("com.vanniktech.maven.publish")
-    id("org.jetbrains.kotlin.jvm")
+    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.kotlin.jvm)
 }
 
 kotlin {
@@ -27,10 +27,10 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect:2.4.10")
-    implementation("jakarta.validation:jakarta.validation-api:3.1.1")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.19.0")
+    implementation(libs.kotlin.reflect)
+    implementation(libs.jakarta.validation.api)
+    implementation(libs.jackson.annotations)
 
-    testImplementation("io.kotest:kotest-runner-junit5:6.2.4")
-    testImplementation("io.kotest:kotest-assertions-core:6.2.4")
+    testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.kotest.assertions.core)
 }
