@@ -11,10 +11,6 @@ tasks.named<JavaExec>("run") {
     workingDir = rootProject.projectDir
 }
 
-kotlin {
-    jvmToolchain(17)
-}
-
 sourceSets {
     with(main.get()) {
         kotlin { srcDir("src") }
@@ -26,8 +22,9 @@ sourceSets {
 
 dependencies {
     implementation(project(":lib"))
+    implementation(project(":processors:jackson"))
+    implementation(project(":processors:jakarta-validation"))
     implementation(libs.reflections)
 
-    compileOnly(libs.jackson.annotations)
     compileOnly(libs.hibernate.validator)
 }

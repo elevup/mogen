@@ -1,12 +1,10 @@
 plugins {
     application
+    `java-test-fixtures`
     alias(libs.plugins.maven.publish)
     alias(libs.plugins.kotlin.jvm)
 }
 
-kotlin {
-    jvmToolchain(17)
-}
 
 sourceSets {
     main {
@@ -22,16 +20,20 @@ sourceSets {
     }
 }
 
+// Test fixtures exist only for the :processors:* modules' tests, they are never published
+(components["java"] as AdhocComponentWithVariants).run {
+    withVariantsFromConfiguration(configurations["testFixturesApiElements"]) { skip() }
+    withVariantsFromConfiguration(configurations["testFixturesRuntimeElements"]) { skip() }
+}
+
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
 dependencies {
     implementation(libs.kotlin.reflect)
-    implementation(libs.jakarta.validation.api)
-    implementation(libs.jackson.annotations)
-    implementation(libs.skrutiny)
-    implementation(libs.kotlinx.serialization)
+
+    testFixturesApi(libs.kotest.assertions.core)
 
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)

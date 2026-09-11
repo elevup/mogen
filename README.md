@@ -47,6 +47,18 @@ Library is available on Maven Central.
 implementation 'com.elevup:mogen:$version'
 ```
 
+Annotation processors are published as separate artifacts, so you only pull in the annotation
+library you actually use. Add the ones you need:
+
+```groovy
+implementation 'com.elevup:mogen-jackson:$version'                 // @JsonProperty, @JsonValue
+implementation 'com.elevup:mogen-jakarta-validation:$version'      // @Size, @Min, @Max, @Pattern, ...
+implementation 'com.elevup:mogen-kotlinx-serialization:$version'   // @SerialName
+implementation 'com.elevup:mogen-skrutiny:$version'                // @Length, @Min, @Max, @Pattern (requires Java 21)
+```
+
+`DeprecatedAnnotationProcessor` (Kotlin's own `@Deprecated`) ships with the core artifact.
+
 ## How to use
 First you need to gather all classes that need to be transformed. Simple create list of them.
 
