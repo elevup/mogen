@@ -4,7 +4,7 @@ import com.elevup.annotation.model.ProcessedAnnotation
 import kotlin.reflect.KClass
 
 /**
- * Checks if given field is deprecated and grabs reason why
+ * Checks if a given field is deprecated and grabs the reason why
  */
 class DeprecatedAnnotationProcessor : AnnotationProcessor {
 

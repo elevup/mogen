@@ -30,6 +30,8 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.jakarta.validation.api)
     implementation(libs.jackson.annotations)
+    implementation(libs.skrutiny)
+    implementation(libs.kotlinx.serialization)
 
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)

@@ -13,23 +13,27 @@ import kotlin.reflect.KClass
 class JavaXAnnotationProcessor : AnnotationProcessor {
 
     override fun process(annotations: Iterable<Annotation>, klass: KClass<*>): List<ProcessedAnnotation> =
-        annotations.map { annotation ->
+        annotations.flatMap { annotation ->
             when (annotation) {
                 is Size -> listOfNotNull(
                     ProcessedAnnotation.Minimum(annotation.min.toLong()),
                     ProcessedAnnotation.Maximum(annotation.max.toLong()).takeIf { annotation.max != Int.MAX_VALUE },
                 )
+
                 is Min -> listOf(
                     ProcessedAnnotation.Minimum(annotation.value)
                 )
+
                 is Max -> listOf(
                     ProcessedAnnotation.Maximum(annotation.value)
                 )
+
                 is Pattern -> listOf(
                     ProcessedAnnotation.Regex(annotation.regexp)
                 )
+
                 else -> emptyList()
             }
-        }.flatten()
+        }
 
 }
