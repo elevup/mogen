@@ -42,7 +42,7 @@ you can find generated output.
 
 Library is available on Maven Central.
 
-![Latest version](https://img.shields.io/maven-central/v/com.elevup/mogen "Latest lib version")
+![Latest version](https://img.shields.io/maven-central/v/com.elevup.mogen/mogen "Latest lib version")
 ```groovy
 implementation 'com.elevup:mogen:$version'
 ```
@@ -51,10 +51,10 @@ Annotation processors are published as separate artifacts, so you only pull in t
 library you actually use. Add the ones you need:
 
 ```groovy
-implementation 'com.elevup:mogen-jackson:$version'                 // @JsonProperty, @JsonValue
-implementation 'com.elevup:mogen-jakarta-validation:$version'      // @Size, @Min, @Max, @Pattern, ...
-implementation 'com.elevup:mogen-kotlinx-serialization:$version'   // @SerialName
-implementation 'com.elevup:mogen-skrutiny:$version'                // @Length, @Min, @Max, @Pattern (requires Java 21)
+implementation 'com.elevup.mogen:mogen-jackson:$version'                 // @JsonProperty, @JsonValue
+implementation 'com.elevup.mogen:mogen-jakarta-validation:$version'      // @Size, @Min, @Max, @Pattern, ...
+implementation 'com.elevup.mogen:mogen-kotlinx-serialization:$version'   // @SerialName
+implementation 'com.elevup.mogen:mogen-skrutiny:$version'                // @Length, @Min, @Max, @Pattern
 ```
 
 `DeprecatedAnnotationProcessor` (Kotlin's own `@Deprecated`) ships with the core artifact.
