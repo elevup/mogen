@@ -44,10 +44,11 @@ Library is available on Maven Central.
 
 ![Latest version](https://img.shields.io/maven-central/v/com.elevup.mogen/mogen "Latest lib version")
 ```groovy
-implementation 'com.elevup:mogen:$version'
+implementation 'com.elevup.mogen:mogen:$version' // Version 2.X.Y
+implementation 'com.elevup:mogen:$version' // Version 1.X.Y
 ```
 
-Annotation processors are published as separate artifacts, so you only pull in the annotation
+Since version `2.X.Y` annotation processors are published as separate artifacts, so you only pull in the annotation
 library you actually use. Add the ones you need:
 
 ```groovy
