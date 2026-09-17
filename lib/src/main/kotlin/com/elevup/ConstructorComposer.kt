@@ -29,7 +29,9 @@ interface ConstructorComposer : Composer {
         type: Type,
         formatType: (Type) -> String,
         annotations: MergedAnnotations = MergedAnnotations(),
-        indent: String? = null
+        indent: String? = null,
+        isOverride: Boolean,
+        isSealedSuperclass: Boolean
     )
 
     /**
@@ -38,5 +40,8 @@ interface ConstructorComposer : Composer {
      */
     fun StringBuilder.appendFooter(indent: String?)
 
-
+    /**
+     * Return true if this constructor generator should be also used for sealed superclasses
+     */
+    fun useForSealedSuperclasses(): Boolean
 }

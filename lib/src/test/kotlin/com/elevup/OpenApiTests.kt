@@ -1,9 +1,7 @@
 package com.elevup
 
 import com.elevup.languages.openapi.OpenApiGenerator
-import com.elevup.languages.ts.TypeScriptGenerator
 import com.elevup.model.ComposerConfig
-import com.elevup.model.GenericIndents
 import com.elevup.model.OpenApiIndents
 import com.elevup.models.*
 import io.kotest.core.spec.style.StringSpec
@@ -193,6 +191,113 @@ class OpenApiTests : StringSpec({
                   type: number
                   format: int64
                   nullable: false
+                """.trimIndent()
+            )
+        )
+    }
+
+    "maps" {
+        getGenerator().appendAndExpectOutput(
+            clazz = ClassWithMaps::class,
+            classes = Types(
+                """
+                DataClass:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      format: int64
+                      nullable: false
+                    name:
+                      type: string
+                      nullable: true
+                """.trimIndent(),
+                """
+                ClassWithMaps:
+                  type: object
+                  properties:
+                    dataClassString: {}
+                    stringAny:
+                      type: object
+                      additionalProperties: true
+                      nullable: false
+                    stringDataClass:
+                      type: object
+                      additionalProperties:
+                        ${dollar}ref: '#/components/schemas/DataClass'
+                      nullable: false
+                    stringLong:
+                      type: object
+                      additionalProperties:
+                        type: number
+                        format: int64
+                        nullable: false
+                      nullable: false
+                """.trimIndent()
+            )
+        )
+    }
+
+    "sealed" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedUsage::class,
+            classes = Types(
+                """
+                SealedUsage:
+                  type: object
+                  properties:
+                    parent:
+                      ${dollar}ref: '#/components/schemas/SealedClass'
+                    typeA:
+                      ${dollar}ref: '#/components/schemas/SealedClassA'
+                    typeB:
+                      ${dollar}ref: '#/components/schemas/SealedClassB'
+                """.trimIndent(),
+                """
+                SealedClass:
+                  allOf:
+                    - type: object
+                      properties:
+                        id:
+                          type: number
+                          format: int64
+                          nullable: false
+                        type:
+                          type: string
+                          nullable: false
+                    - oneOf:
+                      - ${dollar}ref: '#/components/schemas/SealedClassA'
+                      - ${dollar}ref: '#/components/schemas/SealedClassB'
+                """.trimIndent(),
+                """
+                SealedClassA:
+                  type: object
+                  properties:
+                    customA:
+                      type: string
+                      nullable: false
+                    id:
+                      type: number
+                      format: int64
+                      nullable: false
+                    type:
+                      type: string
+                      nullable: false
+                """.trimIndent(),
+                """
+                SealedClassB:
+                  type: object
+                  properties:
+                    customB:
+                      type: string
+                      nullable: false
+                    id:
+                      type: number
+                      format: int64
+                      nullable: false
+                    type:
+                      type: string
+                      nullable: false
                 """.trimIndent()
             )
         )

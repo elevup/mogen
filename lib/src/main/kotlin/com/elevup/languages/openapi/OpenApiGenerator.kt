@@ -34,6 +34,23 @@ class OpenApiGenerator(
                     appendLine("description: DEPRECATED ~ ${annotations.deprecated}")
                 }
             }
+
+            is Type.Map -> {
+                val valueType = valueType?.localType ?: Type.Any
+                appendLine("type: object")
+                if (valueType != Type.Any) {
+                    appendLine("additionalProperties:")
+                    appendLine(valueType.format().prependIndent(INDENT))
+                } else {
+                    appendLine("additionalProperties: true")
+                }
+                appendLine("nullable: $nullable")
+                if (annotations.deprecated != null) {
+                    appendLine("deprecated: true")
+                    appendLine("description: DEPRECATED ~ ${annotations.deprecated}")
+                }
+            }
+
             is Type.Iterable -> {
                 appendLine("type: array")
                 if (annotations.deprecated != null) {
@@ -45,6 +62,7 @@ class OpenApiGenerator(
                 val subType = type?.localType ?: Type.Any
                 appendLine(subType.format(MergedAnnotations()).prependIndent(INDENT))
             }
+
             is Type.Primitive -> {
                 appendLine("type: $name")
                 type?.openApiFormat?.let { appendLine("format: $it") }
@@ -54,6 +72,7 @@ class OpenApiGenerator(
                     appendLine("description: DEPRECATED ~ ${annotations.deprecated}")
                 }
             }
+
             is Type.Reference -> {
                 if (nullable) {
                     appendLine("nullable: true")
@@ -85,6 +104,7 @@ class OpenApiGenerator(
             Long::class,
             Short::class,
             Byte::class -> "number"
+
             Float::class, Double::class -> "number"
             else -> null
         }

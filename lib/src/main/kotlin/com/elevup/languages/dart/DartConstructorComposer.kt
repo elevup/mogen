@@ -20,10 +20,12 @@ class DartConstructorComposer(
         type: Type,
         formatType: (Type) -> String,
         annotations: MergedAnnotations,
-        indent: String?
+        indent: String?,
+        isOverride: Boolean,
+        isSealedSuperclass: Boolean
     ) {
         val realName = annotations.fieldName ?: name
-        appendLine("required this.$realName,", indent)
+        appendLine("required ${if (isOverride) "super" else "this"}.$realName,", indent)
 
     }
 
@@ -31,4 +33,6 @@ class DartConstructorComposer(
         appendLine("});", indent)
         appendLine()
     }
+
+    override fun useForSealedSuperclasses(): Boolean = true
 }

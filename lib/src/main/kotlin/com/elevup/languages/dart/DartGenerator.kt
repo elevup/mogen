@@ -31,6 +31,14 @@ class DartGenerator(
                 "List<${subType.format()}>"
             }
         }
+        is Type.Map -> {
+            val valueType = valueType?.localType ?: Type.Any
+            if (nullable) {
+                "Map<String, ${valueType.format()}>?"
+            } else {
+                "Map<String, ${valueType.format()}>"
+            }
+        }
         is Type.Primitive -> {
             if (nullable) {
                 "$name?"
@@ -43,7 +51,7 @@ class DartGenerator(
         } else {
             config.formatName(name)
         }
-        Type.Any -> "any"
+        Type.Any -> "dynamic"
     }
 
 

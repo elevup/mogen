@@ -21,6 +21,16 @@ class TypeScriptGenerator(
 ) {
 
     override fun Type.format(annotations: MergedAnnotations): String = when (this) {
+        is Type.Map -> {
+            val valueType = valueType?.localType ?: Type.Any
+            buildString {
+                append("Record<string, ")
+                append(valueType.format())
+                if (valueType.nullable) append(" | null")
+                append(">")
+            }
+        }
+
         is Type.Iterable -> {
             val subType = type?.localType ?: Type.Any
             if (subType.nullable) {
@@ -29,6 +39,7 @@ class TypeScriptGenerator(
                 "${subType.format()}[]"
             }
         }
+
         is Type.Primitive -> name
         is Type.Reference -> config.formatName(name)
         Type.Any -> "any"
@@ -43,6 +54,7 @@ class TypeScriptGenerator(
             Long::class,
             Short::class,
             Byte::class -> "number"
+
             Float::class, Double::class -> "number"
             else -> null
         }

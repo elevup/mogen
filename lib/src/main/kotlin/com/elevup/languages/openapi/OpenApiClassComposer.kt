@@ -11,10 +11,20 @@ class OpenApiClassComposer(
     override val config: ComposerConfig
 ) : ClassComposer {
 
-    override fun StringBuilder.appendHeader(typeName: String) {
+    override fun StringBuilder.appendHeader(
+        typeName: String,
+        sealedSuperclass: String?,
+        sealedSubclasses: List<String>
+    ) {
         appendLine("${config.formatName(typeName)}:")
-        appendLine("  type: object")
-        appendLine("  properties:")
+        if (sealedSubclasses.isNotEmpty()) {
+            appendLine("  allOf:")
+            appendLine("    - type: object")
+            appendLine("      properties:")
+        } else {
+            appendLine("  type: object")
+            appendLine("  properties:")
+        }
     }
 
     override fun StringBuilder.appendProperty(
@@ -22,30 +32,49 @@ class OpenApiClassComposer(
         type: Type,
         formatType: (Type) -> String,
         annotations: MergedAnnotations,
-        indent: String?
+        indent: String?,
+        isOverride: Boolean,
+        isSealedSuperclass: Boolean
     ) {
-        val realName = annotations.fieldName ?: name
+        val propertyCode = buildString {
+            val realName = annotations.fieldName ?: name
 
-        appendLine("$realName:")
-        appendLine(formatType(type), indent)
+            if (type is Type.Any) {
+                appendLine("$realName: {}")
+            } else {
+                appendLine("$realName:")
+                appendLine(formatType(type), indent)
 
-        if (type is Type.Primitive) {
-            when (type.name) {
-                "number" -> {
-                    annotations.min?.let { appendLine("minimum: $it", indent) }
-                    annotations.max?.let { appendLine("maximum: $it", indent) }
-                }
-                "string" -> {
-                    annotations.min?.let { appendLine("minLength: $it", indent) }
-                    annotations.max?.let { appendLine("maxLength: $it", indent) }
-                    annotations.regex?.let { appendLine("pattern: '$it'", indent) }
+                if (type is Type.Primitive) {
+                    when (type.name) {
+                        "number" -> {
+                            annotations.min?.let { appendLine("minimum: $it", indent) }
+                            annotations.max?.let { appendLine("maximum: $it", indent) }
+                        }
+
+                        "string" -> {
+                            annotations.min?.let { appendLine("minLength: $it", indent) }
+                            annotations.max?.let { appendLine("maxLength: $it", indent) }
+                            annotations.regex?.let { appendLine("pattern: '$it'", indent) }
+                        }
+                    }
                 }
             }
         }
 
+        appendLine(propertyCode.trimEnd().let { if (isSealedSuperclass) it.prependIndent("    ") else it })
+
     }
 
-    override fun StringBuilder.appendFooter() {
-
+    override fun StringBuilder.appendFooter(
+        sealedSuperclass: String?,
+        sealedSubclasses: List<String>
+    ) {
+        if (sealedSubclasses.isNotEmpty()) {
+            appendLine("    - oneOf:")
+            sealedSubclasses.forEach {
+                appendLine("      - \$ref: '#/components/schemas/${config.formatName(it)}'")
+            }
+        }
     }
 }

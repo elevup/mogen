@@ -12,9 +12,14 @@ import com.elevup.util.wrapIntoComment
 class TypeScriptClassComposer(
     override val config: ComposerConfig
 ) : ClassComposer {
-
-    override fun StringBuilder.appendHeader(typeName: String) {
-        appendLine("export interface ${config.formatName(typeName)} {")
+    override fun StringBuilder.appendHeader(
+        typeName: String,
+        sealedSuperclass: String?,
+        sealedSubclasses: List<String>
+    ) {
+        append("export interface ${config.formatName(typeName)}")
+        sealedSuperclass?.let { append(" extends ${config.formatName(it)}") }
+        appendLine(" {")
     }
 
     override fun StringBuilder.appendProperty(
@@ -22,8 +27,12 @@ class TypeScriptClassComposer(
         type: Type,
         formatType: (Type) -> String,
         annotations: MergedAnnotations,
-        indent: String?
+        indent: String?,
+        isOverride: Boolean,
+        isSealedSuperclass: Boolean
     ) {
+        if (isOverride) return
+
         val tempName = annotations.fieldName ?: name
         val realName = if (type.nullable) {
             "$tempName?"
@@ -46,7 +55,7 @@ class TypeScriptClassComposer(
         appendLine("$realName: ${formatType(type)};", indent)
     }
 
-    override fun StringBuilder.appendFooter() {
+    override fun StringBuilder.appendFooter(sealedSuperclass: String?, sealedSubclasses: List<String>) {
         appendLine("}")
     }
 }

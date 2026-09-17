@@ -19,6 +19,14 @@ sealed class Type(
     ) : Type(nullable)
 
     /**
+     * Key-Value map
+     */
+    data class Map(
+        val valueType: KType?,
+        override val nullable: Boolean,
+    ): Type(nullable)
+
+    /**
      * Reference to another type à la typealias
      */
     data class Reference(

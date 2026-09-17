@@ -14,7 +14,11 @@ interface ClassComposer : Composer {
      *
      * @param typeName - name of type
      */
-    fun StringBuilder.appendHeader(typeName: String)
+    fun StringBuilder.appendHeader(
+        typeName: String,
+        sealedSuperclass: String?,
+        sealedSubclasses: List<String>,
+    )
 
     /**
      * Appends one property of a class
@@ -23,20 +27,27 @@ interface ClassComposer : Composer {
      * @param type - local type of property
      * @param formatType - function that converts type to a String
      * @param annotations - optional annotations
+     * @param isOverride - property overrides parent's one
+     * @param isSealedSuperclass - this class is a sealed superclass
      */
     fun StringBuilder.appendProperty(
         name: String,
         type: Type,
         formatType: (Type) -> String,
         annotations: MergedAnnotations = MergedAnnotations(),
-        indent: String? = null
+        indent: String? = null,
+        isOverride: Boolean,
+        isSealedSuperclass: Boolean
     )
 
     /**
      * Appends class footer declaration.
      * Example: Kotlin `)`
      */
-    fun StringBuilder.appendFooter()
+    fun StringBuilder.appendFooter(
+        sealedSuperclass: String?,
+        sealedSubclasses: List<String>,
+    )
 
 
 }

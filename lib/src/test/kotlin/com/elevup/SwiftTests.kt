@@ -1,7 +1,6 @@
 package com.elevup
 
 import com.elevup.languages.swift.SwiftGenerator
-import com.elevup.languages.ts.TypeScriptGenerator
 import com.elevup.model.ComposerConfig
 import com.elevup.model.GenericIndents
 import com.elevup.models.*
@@ -134,6 +133,63 @@ class SwiftTests : StringSpec({
             ),
             types = Types(
                 "typealias ClassWithOptionalTypeId = Int"
+            )
+        )
+    }
+
+    "maps" {
+        getGenerator().appendAndExpectOutput(
+            clazz = ClassWithMaps::class,
+            classes = Types(
+                """
+                struct DataClass: Codable {
+                  let id: Int
+                  let name: String?
+                }
+                """.trimIndent(),
+                """
+                struct ClassWithMaps: Codable {
+                  let dataClassString: AnyCodable
+                  let stringAny: [String: AnyCodable]
+                  let stringDataClass: [String: DataClass]
+                  let stringLong: [String: Int]
+                }
+                """.trimIndent()
+            )
+        )
+    }
+
+    "sealed" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedUsage::class,
+            classes = Types(
+                """
+                struct SealedUsage: Codable {
+                  let parent: SealedClass
+                  let typeA: SealedClassA
+                  let typeB: SealedClassB
+                }
+                """.trimIndent(),
+                """
+                protocol SealedClass {
+                  var id: Int { get }
+                  var type: String { get }
+                }
+                """.trimIndent(),
+                """
+                struct SealedClassA: SealedClass, Codable {
+                  let customA: String
+                  let id: Int
+                  let type: String
+                }
+                """.trimIndent(),
+                """
+                struct SealedClassB: SealedClass, Codable {
+                  let customB: String
+                  let id: Int
+                  let type: String
+                }
+                """.trimIndent(),
             )
         )
     }

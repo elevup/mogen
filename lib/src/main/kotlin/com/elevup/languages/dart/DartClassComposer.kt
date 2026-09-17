@@ -13,8 +13,20 @@ class DartClassComposer(
     override val config: ComposerConfig
 ) : ClassComposer {
 
-    override fun StringBuilder.appendHeader(typeName: String) {
-        appendLine("class ${config.formatName(typeName)} {")
+    override fun StringBuilder.appendHeader(
+        typeName: String,
+        sealedSuperclass: String?,
+        sealedSubclasses: List<String>
+    ) {
+        if (sealedSubclasses.isNotEmpty()) {
+            append("sealed class ${config.formatName(typeName)}")
+        } else {
+            append("class ${config.formatName(typeName)}")
+        }
+
+        sealedSuperclass?.also { append(" extends ${config.formatName(it)}") }
+
+        appendLine(" {")
     }
 
     override fun StringBuilder.appendProperty(
@@ -22,8 +34,12 @@ class DartClassComposer(
         type: Type,
         formatType: (Type) -> String,
         annotations: MergedAnnotations,
-        indent: String?
+        indent: String?,
+        isOverride: Boolean,
+        isSealedSuperclass: Boolean
     ) {
+        if (isOverride) return
+
         val realName = annotations.fieldName ?: name
         listOfNotNull(
             "min: ${annotations.min}".takeIf { annotations.min != null },
@@ -40,7 +56,10 @@ class DartClassComposer(
         appendLine("final ${formatType(type)} $realName;", indent)
     }
 
-    override fun StringBuilder.appendFooter() {
+    override fun StringBuilder.appendFooter(
+        sealedSuperclass: String?,
+        sealedSubclasses: List<String>
+    ) {
         appendLine("}")
     }
 }

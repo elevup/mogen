@@ -1,8 +1,6 @@
 package com.elevup
 
 import com.elevup.languages.dart.DartGenerator
-import com.elevup.languages.swift.SwiftGenerator
-import com.elevup.languages.ts.TypeScriptGenerator
 import com.elevup.model.ComposerConfig
 import com.elevup.model.GenericIndents
 import com.elevup.models.*
@@ -181,6 +179,100 @@ class DartTests : StringSpec({
             ),
             types = Types(
                 "typedef ClassWithOptionalTypeId = int;"
+            )
+        )
+    }
+
+    "maps" {
+        getGenerator().appendAndExpectOutput(
+            clazz = ClassWithMaps::class,
+            classes = Types(
+                """
+                class DataClass {
+                  final int id;
+                  final String? name;
+                
+                  DataClass({
+                    required this.id,
+                    required this.name,
+                  });
+                
+                }
+                """.trimIndent(),
+                """
+                class ClassWithMaps {
+                  final dynamic dataClassString;
+                  final Map<String, dynamic> stringAny;
+                  final Map<String, DataClass> stringDataClass;
+                  final Map<String, int> stringLong;
+
+                  ClassWithMaps({
+                    required this.dataClassString,
+                    required this.stringAny,
+                    required this.stringDataClass,
+                    required this.stringLong,
+                  });
+
+                }
+                """.trimIndent()
+            )
+        )
+    }
+
+    "sealed" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedUsage::class,
+            classes = Types(
+                """
+                class SealedUsage {
+                  final SealedClass parent;
+                  final SealedClassA typeA;
+                  final SealedClassB typeB;
+
+                  SealedUsage({
+                    required this.parent,
+                    required this.typeA,
+                    required this.typeB,
+                  });
+
+                }
+                """.trimIndent(),
+                """
+                sealed class SealedClass {
+                  final int id;
+                  final String type;
+                
+                  SealedClass({
+                    required this.id,
+                    required this.type,
+                  });
+                
+                }
+                """.trimIndent(),
+                """
+                class SealedClassA extends SealedClass {
+                  final String customA;
+                
+                  SealedClassA({
+                    required this.customA,
+                    required super.id,
+                    required super.type,
+                  });
+                
+                }
+                """.trimIndent(),
+                """
+                class SealedClassB extends SealedClass {
+                  final String customB;
+                
+                  SealedClassB({
+                    required this.customB,
+                    required super.id,
+                    required super.type,
+                  });
+                
+                }
+                """.trimIndent(),
             )
         )
     }

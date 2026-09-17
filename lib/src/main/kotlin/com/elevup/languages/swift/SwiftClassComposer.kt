@@ -13,8 +13,19 @@ class SwiftClassComposer(
     override val config: ComposerConfig
 ) : ClassComposer {
 
-    override fun StringBuilder.appendHeader(typeName: String) {
-        appendLine("struct ${config.formatName(typeName)}: Codable {")
+    override fun StringBuilder.appendHeader(
+        typeName: String,
+        sealedSuperclass: String?,
+        sealedSubclasses: List<String>
+    ) {
+        when {
+            sealedSubclasses.isNotEmpty() -> appendLine("protocol ${config.formatName(typeName)} {")
+            sealedSuperclass != null -> appendLine(
+                "struct ${config.formatName(typeName)}: ${config.formatName(sealedSuperclass)}, Codable {"
+            )
+
+            else -> appendLine("struct ${config.formatName(typeName)}: Codable {")
+        }
     }
 
     override fun StringBuilder.appendProperty(
@@ -22,7 +33,9 @@ class SwiftClassComposer(
         type: Type,
         formatType: (Type) -> String,
         annotations: MergedAnnotations,
-        indent: String?
+        indent: String?,
+        isOverride: Boolean,
+        isSealedSuperclass: Boolean
     ) {
         val realName = annotations.fieldName ?: name
 
@@ -41,10 +54,14 @@ class SwiftClassComposer(
             appendLine(annotations.deprecated.swiftDeprecated(), indent)
         }
 
-        appendLine("let $realName: ${formatType(type)}", indent)
+        if (isSealedSuperclass) {
+            appendLine("var $realName: ${formatType(type)} { get }", indent)
+        } else {
+            appendLine("let $realName: ${formatType(type)}", indent)
+        }
     }
 
-    override fun StringBuilder.appendFooter() {
+    override fun StringBuilder.appendFooter(sealedSuperclass: String?, sealedSubclasses: List<String>) {
         appendLine("}")
     }
 }

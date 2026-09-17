@@ -15,13 +15,8 @@ import com.elevup.util.appendLine
 import com.elevup.util.exportableMemberProperties
 import com.elevup.util.getAnnotations
 import com.elevup.util.safeObjectInstance
-import kotlin.collections.any
-import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KType
-import kotlin.reflect.full.createType
-import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 abstract class Generator(
     open val annotationProcessors: List<AnnotationProcessor>,
@@ -46,7 +41,9 @@ abstract class Generator(
             } else if (classifier?.primitiveType != null) {
                 Type.Primitive(classifier.primitiveType!!, this)
             } else if (classifier is KClass<*>) {
-                if (classifier.isSubclassOf(Iterable::class) || classifier.javaObjectType.isArray) {
+                if (classifier == Any::class) {
+                    Type.Any
+                } else if (classifier.isSubclassOf(Iterable::class) || classifier.javaObjectType.isArray) {
                     val itemType = when (classifier) {
                         IntArray::class -> Int::class.createType(nullable = false)
                         ShortArray::class -> Short::class.createType(nullable = false)
@@ -71,8 +68,16 @@ abstract class Generator(
                         Type.Any
                     }
                 } else if (classifier.isSubclassOf(Map::class)) {
-                    // TODO Support maps
-                    Type.Any
+                    val keyType = arguments.getOrNull(0)?.type
+                    // in JSON only maps with String keys are allowed
+                    if (keyType?.isSubtypeOf(typeOf<CharSequence>()) == true) {
+                        Type.Map(
+                            valueType = arguments.getOrNull(1)?.type,
+                            nullable = isMarkedNullable
+                        )
+                    } else {
+                        Type.Any
+                    }
                 } else {
                     onClass(klass = classifier)
                     Type.Reference(classifier.generatedName, nullable = isMarkedNullable)
@@ -128,6 +133,17 @@ abstract class Generator(
         }
 
         return with(classGenerator) {
+            // sealed hierarchy check
+            val rawSealedSuperclasses = klass.superclasses.filter { it.isSealed }
+            if (
+                rawSealedSuperclasses.size > 1 ||
+                (rawSealedSuperclasses.isNotEmpty() && klass.isSealed)
+            ) {
+                throw IllegalStateException("Only one sealed parent is allowed")
+            }
+            val rawSealedSuperclass = rawSealedSuperclasses.firstOrNull()
+
+            // class properties
             val rawProperties = klass.exportableMemberProperties.mapNotNull { property ->
                 val annotations = property.getAnnotations(klass)
                 if (annotations.any { it is GeneratorIgnore }) return@mapNotNull null
@@ -135,46 +151,55 @@ abstract class Generator(
                 TempProperty(
                     annotations = annotationProcessors.map { it.process(annotations, klass) }.flatten().merge(),
                     localType = property.returnType.localType,
-                    property = property
+                    property = property,
+                    isOverride = rawSealedSuperclass?.memberProperties
+                        ?.any { it.name == property.name && (it.isOpen || it.isAbstract) } == true
                 )
             }
 
             if (rawProperties.isNotEmpty()) {
-                val properties = buildString {
-                    rawProperties.forEach { (annotations, type, property) ->
-                        appendProperty(
-                            name = property.name,
-                            type = type,
-                            formatType = { type.format(annotations) },
-                            annotations = annotations,
-                            indent = indents.classProperty
-                        )
-                    }
-                }
+                val sealedSuperclass = rawSealedSuperclass?.generatedName
+                val sealedSubclasses = klass.sealedSubclasses.map { it.generatedName }
 
                 buildString {
-                    appendHeader(klass.generatedName)
-                    appendLine(properties.trimEnd(), indents.classProperties)
-
-                    // Optionally append constructor if required by language
-                    constructorGenerator?.apply {
-                        appendLine()
-                        appendHeader(klass.generatedName, indents.constructor)
-
-                        rawProperties.forEach { (annotations, type, property) ->
+                    appendHeader(klass.generatedName, sealedSuperclass, sealedSubclasses)
+                    appendLine(buildString {
+                        rawProperties.forEach { (annotations, type, property, isOverride) ->
                             appendProperty(
                                 name = property.name,
                                 type = type,
                                 formatType = { type.format(annotations) },
                                 annotations = annotations,
-                                indent = indents.constructorProperty
+                                indent = indents.classProperty,
+                                isOverride = isOverride,
+                                isSealedSuperclass = sealedSubclasses.isNotEmpty()
                             )
                         }
+                    }.trimEnd(), indents.classProperties)
 
-                        appendFooter(indents.constructor)
-                    }
+                    // Optionally append constructor if required by language
+                    constructorGenerator
+                        ?.takeIf { sealedSubclasses.isEmpty() || it.useForSealedSuperclasses() }
+                        ?.apply {
+                            appendLine()
+                            appendHeader(klass.generatedName, indents.constructor)
 
-                    appendFooter()
+                            rawProperties.forEach { (annotations, type, property, isOverride) ->
+                                appendProperty(
+                                    name = property.name,
+                                    type = type,
+                                    formatType = { type.format(annotations) },
+                                    annotations = annotations,
+                                    indent = indents.constructorProperty,
+                                    isOverride = isOverride,
+                                    isSealedSuperclass = sealedSubclasses.isNotEmpty()
+                                )
+                            }
+
+                            appendFooter(indents.constructor)
+                        }
+
+                    appendFooter(sealedSuperclass, sealedSubclasses)
                 }.trim()
             } else {
                 // No properties to export -> class can be skipped
@@ -243,6 +268,7 @@ abstract class Generator(
         val annotations: MergedAnnotations,
         val localType: Type,
         val property: KProperty1<*, *>,
+        val isOverride: Boolean
     )
 
     companion object {

@@ -136,4 +136,57 @@ class TypescriptTests : StringSpec({
             )
         )
     }
+
+    "maps" {
+        getGenerator().appendAndExpectOutput(
+            clazz = ClassWithMaps::class,
+            classes = Types(
+                """
+                export interface DataClass {
+                  id: number;
+                  name?: string;
+                }
+                """.trimIndent(),
+                """
+                export interface ClassWithMaps {
+                  dataClassString: any;
+                  stringAny: Record<string, any>;
+                  stringDataClass: Record<string, DataClass>;
+                  stringLong: Record<string, number>;
+                }
+                """.trimIndent()
+            )
+        )
+    }
+
+    "sealed" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedUsage::class,
+            classes = Types(
+                """
+                export interface SealedUsage {
+                  parent: SealedClass;
+                  typeA: SealedClassA;
+                  typeB: SealedClassB;
+                }
+                """.trimIndent(),
+                """
+                export interface SealedClass {
+                  id: number;
+                  type: string;
+                }
+                """.trimIndent(),
+                """
+                export interface SealedClassA extends SealedClass {
+                  customA: string;
+                }
+                """.trimIndent(),
+                """
+                export interface SealedClassB extends SealedClass {
+                  customB: string;
+                }
+                """.trimIndent(),
+            )
+        )
+    }
 })

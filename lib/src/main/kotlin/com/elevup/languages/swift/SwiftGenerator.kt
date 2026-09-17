@@ -22,6 +22,15 @@ class SwiftGenerator(
 
 
     override fun Type.format(annotations: MergedAnnotations): String = when (this) {
+        is Type.Map -> {
+            val valueType = valueType?.localType ?: Type.Any
+            if (nullable) {
+                "[String: ${valueType.format()}]?"
+            } else {
+                "[String: ${valueType.format()}]"
+            }
+        }
+
         is Type.Iterable -> {
             val subType = type?.localType ?: Type.Any
             if (nullable) {
@@ -30,6 +39,7 @@ class SwiftGenerator(
                 "[${subType.format()}]"
             }
         }
+
         is Type.Primitive -> {
             if (nullable) {
                 "$name?"
@@ -37,12 +47,14 @@ class SwiftGenerator(
                 name
             }
         }
+
         is Type.Reference -> if (nullable) {
             "${config.formatName(name)}?"
         } else {
             config.formatName(name)
         }
-        Type.Any -> "Any"
+
+        Type.Any -> "AnyCodable"
     }
 
 
@@ -54,6 +66,7 @@ class SwiftGenerator(
             Long::class,
             Short::class,
             Byte::class -> "Int"
+
             Float::class -> "Float"
             Double::class -> "Double"
             else -> null
