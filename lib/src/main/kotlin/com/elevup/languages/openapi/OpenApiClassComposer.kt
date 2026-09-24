@@ -70,6 +70,12 @@ class OpenApiClassComposer(
         sealedSuperclass: String?,
         sealedSubclasses: List<String>
     ) {
+        // Class without properties (e.g. object in sealed hierarchy) -> `properties: {}`
+        if (endsWith("properties:\n")) {
+            setLength(length - 1)
+            appendLine(" {}")
+        }
+
         if (sealedSubclasses.isNotEmpty()) {
             appendLine("    - oneOf:")
             sealedSubclasses.forEach {

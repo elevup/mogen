@@ -276,4 +276,67 @@ class DartTests : StringSpec({
             )
         )
     }
+
+    "sealed without properties and with object" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedWithoutProperties.Empty::class,
+            classes = Types(
+                """
+                class SealedWithoutPropertiesEmpty extends SealedWithoutProperties {
+
+                  SealedWithoutPropertiesEmpty({
+                  });
+
+                }
+                """.trimIndent(),
+                """
+                sealed class SealedWithoutProperties {
+
+                  SealedWithoutProperties({
+                  });
+
+                }
+                """.trimIndent(),
+                """
+                class SealedWithoutPropertiesValue extends SealedWithoutProperties {
+                  final int value;
+
+                  SealedWithoutPropertiesValue({
+                    required this.value,
+                  });
+
+                }
+                """.trimIndent(),
+            )
+        )
+    }
+
+    "sealed with inherited constructor property" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedWithConstructorProperty.Child::class,
+            classes = Types(
+                """
+                class SealedWithConstructorPropertyChild extends SealedWithConstructorProperty {
+                  final String name;
+
+                  SealedWithConstructorPropertyChild({
+                    required super.id,
+                    required this.name,
+                  });
+
+                }
+                """.trimIndent(),
+                """
+                sealed class SealedWithConstructorProperty {
+                  final int id;
+
+                  SealedWithConstructorProperty({
+                    required this.id,
+                  });
+
+                }
+                """.trimIndent(),
+            )
+        )
+    }
 })

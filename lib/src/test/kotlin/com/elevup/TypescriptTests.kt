@@ -189,4 +189,67 @@ class TypescriptTests : StringSpec({
             )
         )
     }
+
+    "sealed hierarchy is discovered from subclass" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedClass.A::class,
+            classes = Types(
+                """
+                export interface SealedClassA extends SealedClass {
+                  customA: string;
+                }
+                """.trimIndent(),
+                """
+                export interface SealedClass {
+                  id: number;
+                  type: string;
+                }
+                """.trimIndent(),
+                """
+                export interface SealedClassB extends SealedClass {
+                  customB: string;
+                }
+                """.trimIndent(),
+            )
+        )
+    }
+
+    "sealed without properties and with object" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedWithoutProperties.Empty::class,
+            classes = Types(
+                """
+                export interface SealedWithoutPropertiesEmpty extends SealedWithoutProperties {
+                }
+                """.trimIndent(),
+                """
+                export interface SealedWithoutProperties {
+                }
+                """.trimIndent(),
+                """
+                export interface SealedWithoutPropertiesValue extends SealedWithoutProperties {
+                  value: number;
+                }
+                """.trimIndent(),
+            )
+        )
+    }
+
+    "sealed with inherited constructor property" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedWithConstructorProperty.Child::class,
+            classes = Types(
+                """
+                export interface SealedWithConstructorPropertyChild extends SealedWithConstructorProperty {
+                  name: string;
+                }
+                """.trimIndent(),
+                """
+                export interface SealedWithConstructorProperty {
+                  id: number;
+                }
+                """.trimIndent(),
+            )
+        )
+    }
 })

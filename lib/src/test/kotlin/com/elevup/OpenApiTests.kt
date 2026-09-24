@@ -302,4 +302,67 @@ class OpenApiTests : StringSpec({
             )
         )
     }
+
+    "sealed without properties and with object" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedWithoutProperties.Empty::class,
+            classes = Types(
+                """
+                SealedWithoutPropertiesEmpty:
+                  type: object
+                  properties: {}
+                """.trimIndent(),
+                """
+                SealedWithoutProperties:
+                  allOf:
+                    - type: object
+                      properties: {}
+                    - oneOf:
+                      - ${dollar}ref: '#/components/schemas/SealedWithoutPropertiesEmpty'
+                      - ${dollar}ref: '#/components/schemas/SealedWithoutPropertiesValue'
+                """.trimIndent(),
+                """
+                SealedWithoutPropertiesValue:
+                  type: object
+                  properties:
+                    value:
+                      type: number
+                      format: int32
+                      nullable: false
+                """.trimIndent(),
+            )
+        )
+    }
+
+    "sealed with inherited constructor property" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedWithConstructorProperty.Child::class,
+            classes = Types(
+                """
+                SealedWithConstructorPropertyChild:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      format: int64
+                      nullable: false
+                    name:
+                      type: string
+                      nullable: false
+                """.trimIndent(),
+                """
+                SealedWithConstructorProperty:
+                  allOf:
+                    - type: object
+                      properties:
+                        id:
+                          type: number
+                          format: int64
+                          nullable: false
+                    - oneOf:
+                      - ${dollar}ref: '#/components/schemas/SealedWithConstructorPropertyChild'
+                """.trimIndent(),
+            )
+        )
+    }
 })

@@ -26,12 +26,14 @@ Supported features:
  - enums - including custom serialisation name,
  - classes - all public properties are transformed,
  - nested classes,
+ - maps with `String` keys - maps with any other key type are converted to "any" type (JSON allows only string keys),
+ - sealed classes/interfaces - one level of sealed hierarchy (a class can have at most one sealed parent),
  - type aliases - only trivial cases, for example `typealias UserId = Long`.
 
 Unsupported features:
- - maps,
+ - maps with non-`String` keys,
  - generics,
- - inheritance,
+ - inheritance (other than sealed hierarchies),
  - abstract classes,
  - packages (= output is supposed to be printed into one file).
 
@@ -119,6 +121,68 @@ export interface User {
     id: UserId;
 }
 ```
+
+### Maps
+Maps are supported only with `String` (`CharSequence`) keys, since JSON objects allow only string keys. Maps with any
+other key type fall back to "any" type of the target language.
+
+Input (Kotlin):
+```kotlin
+data class ClassWithMaps(
+    val dataClassString: Map<DataClass, String>,
+    val stringAny: Map<String, Any>,
+    val stringLong: Map<String, Long>,
+)
+```
+
+Output (TypeScript):
+```typescript
+export interface ClassWithMaps {
+  dataClassString: any;
+  stringAny: Record<string, any>;
+  stringLong: Record<string, number>;
+}
+```
+
+### Sealed classes
+Sealed classes and interfaces are converted to a parent type and its subtypes. Appending any class of the hierarchy
+generates the whole hierarchy (parent and all subclasses, including `object` subclasses). Properties overridden in
+subclasses are declared only in the parent. Nested sealed hierarchies (sealed class with sealed parent) and multiple sealed parents
+are not supported and throw `IllegalStateException`.
+
+Input (Kotlin):
+```kotlin
+sealed interface SealedClass {
+    val id: Long
+    val type: String
+
+    data class A(override val id: Long, val customA: String) : SealedClass {
+        override val type = "A"
+    }
+
+    data class B(override val id: Long, val customB: String) : SealedClass {
+        override val type = "B"
+    }
+}
+```
+
+Output (TypeScript):
+```typescript
+export interface SealedClass {
+  id: number;
+  type: string;
+}
+
+export interface SealedClassA extends SealedClass {
+  customA: string;
+}
+
+export interface SealedClassB extends SealedClass {
+  customB: string;
+}
+```
+
+Dart output uses `sealed class` / `extends`, Swift and OpenApi have their own representation (OpenApi uses `allOf`).
 
 ### Indents
 Everyone uses different indentation rules. To make it easier for you Mogen lets you configure basic indentation unit.
@@ -253,6 +317,14 @@ val reflections = Reflections(
 val typeList = reflections.getSubTypesOf(Object::class.java) + reflections.getSubTypesOf(Enum::class.java)
 val classes = typeList.map { c -> c.kotlin }.distinct()
 ```
+
+## Known issues
+
+- **Swift: sealed parent cannot be used as a property type.** Sealed parent is generated as a `protocol`, which is not
+  `Codable`, so a `Codable` struct holding it (e.g. `let parent: SealedClass`) does not compile. Subclasses themselves
+  (`SealedClassA`, ...) work fine.
+- **OpenApi: sealed hierarchies have no `discriminator`.** Parent is generated as `allOf` + `oneOf` of its subclasses,
+  which is valid, but client generators may not produce polymorphic types from it.
 
 ## License
 

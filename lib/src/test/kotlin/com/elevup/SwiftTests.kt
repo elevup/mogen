@@ -193,4 +193,23 @@ class SwiftTests : StringSpec({
             )
         )
     }
+
+    "sealed with inherited constructor property" {
+        getGenerator().appendAndExpectOutput(
+            clazz = SealedWithConstructorProperty.Child::class,
+            classes = Types(
+                """
+                struct SealedWithConstructorPropertyChild: SealedWithConstructorProperty, Codable {
+                  let id: Int
+                  let name: String
+                }
+                """.trimIndent(),
+                """
+                protocol SealedWithConstructorProperty {
+                  var id: Int { get }
+                }
+                """.trimIndent(),
+            )
+        )
+    }
 })

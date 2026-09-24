@@ -90,6 +90,9 @@ abstract class CachedGenerator(
                 name = klass.generatedName,
                 code = definition,
             )
+
+            // Sealed parent and subclasses are generated after this class, so the parent keeps its position
+            klass.sealedRelatives.forEach { onClass(it) }
         }
 
     }

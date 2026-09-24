@@ -127,44 +127,43 @@ abstract class Generator(
      * Generates class definition from [klass] using [enumGenerator]
      */
     protected fun generateClass(klass: KClass<*>): String? {
-        // Object classes cannot be instantiated on the fly so they are gracefully ignored
-        if (klass.safeObjectInstance != null || klass.annotations.any { it is GeneratorIgnore }) {
-            return null
-        }
+        if (klass.annotations.any { it is GeneratorIgnore }) return null
+        if (klass.safeObjectInstance != null && klass.sealedSuperclass == null) return null
 
         return with(classGenerator) {
-            // sealed hierarchy check
-            val rawSealedSuperclasses = klass.superclasses.filter { it.isSealed }
-            if (
-                rawSealedSuperclasses.size > 1 ||
-                (rawSealedSuperclasses.isNotEmpty() && klass.isSealed)
-            ) {
-                throw IllegalStateException("Only one sealed parent is allowed")
-            }
-            val rawSealedSuperclass = rawSealedSuperclasses.firstOrNull()
+            val rawSealedSuperclass = klass.sealedSuperclass
+            val rawSealedSubclasses = klass.exportableSealedSubclasses
+            val isSealedSuperclass = rawSealedSubclasses.isNotEmpty()
 
             // class properties
             val rawProperties = klass.exportableMemberProperties.mapNotNull { property ->
-                val annotations = property.getAnnotations(klass)
-                if (annotations.any { it is GeneratorIgnore }) return@mapNotNull null
-
-                TempProperty(
-                    annotations = annotationProcessors.map { it.process(annotations, klass) }.flatten().merge(),
-                    localType = property.returnType.localType,
-                    property = property,
+                property.toTempProperty(
+                    klass = klass,
                     isOverride = rawSealedSuperclass?.memberProperties
                         ?.any { it.name == property.name && (it.isOpen || it.isAbstract) } == true
                 )
             }
 
-            if (rawProperties.isNotEmpty()) {
-                val sealedSuperclass = rawSealedSuperclass?.generatedName
-                val sealedSubclasses = klass.sealedSubclasses.map { it.generatedName }
+            // Non-overridable properties inherited from sealed parent. They are not declared by this class,
+            // but some languages have to repeat them (OpenApi, Swift) or pass them to parent's constructor (Dart).
+            val inheritedProperties = rawSealedSuperclass?.exportableMemberProperties.orEmpty()
+                .filter { parentProperty -> rawProperties.none { it.property.name == parentProperty.name } }
+                .mapNotNull { it.toTempProperty(klass = rawSealedSuperclass!!, isOverride = true) }
 
-                buildString {
-                    appendHeader(klass.generatedName, sealedSuperclass, sealedSubclasses)
+            // No properties to export -> class can be skipped unless it is a part of sealed hierarchy
+            if (rawProperties.isEmpty() && rawSealedSuperclass == null && !isSealedSuperclass) {
+                return@with null
+            }
+            val allProperties = (rawProperties + inheritedProperties).sortedBy { it.property.name }
+
+            val sealedSuperclass = rawSealedSuperclass?.generatedName
+            val sealedSubclasses = rawSealedSubclasses.map { it.generatedName }
+
+            buildString {
+                appendHeader(klass.generatedName, sealedSuperclass, sealedSubclasses)
+                if (allProperties.isNotEmpty()) {
                     appendLine(buildString {
-                        rawProperties.forEach { (annotations, type, property, isOverride) ->
+                        allProperties.forEach { (annotations, type, property, isOverride) ->
                             appendProperty(
                                 name = property.name,
                                 type = type,
@@ -172,40 +171,68 @@ abstract class Generator(
                                 annotations = annotations,
                                 indent = indents.classProperty,
                                 isOverride = isOverride,
-                                isSealedSuperclass = sealedSubclasses.isNotEmpty()
+                                isSealedSuperclass = isSealedSuperclass
                             )
                         }
                     }.trimEnd(), indents.classProperties)
+                }
 
-                    // Optionally append constructor if required by language
-                    constructorGenerator
-                        ?.takeIf { sealedSubclasses.isEmpty() || it.useForSealedSuperclasses() }
-                        ?.apply {
-                            appendLine()
-                            appendHeader(klass.generatedName, indents.constructor)
+                // Optionally append constructor if required by language
+                constructorGenerator
+                    ?.takeIf { !isSealedSuperclass || it.useForSealedSuperclasses() }
+                    ?.apply {
+                        appendLine()
+                        appendHeader(klass.generatedName, indents.constructor)
 
-                            rawProperties.forEach { (annotations, type, property, isOverride) ->
-                                appendProperty(
-                                    name = property.name,
-                                    type = type,
-                                    formatType = { type.format(annotations) },
-                                    annotations = annotations,
-                                    indent = indents.constructorProperty,
-                                    isOverride = isOverride,
-                                    isSealedSuperclass = sealedSubclasses.isNotEmpty()
-                                )
-                            }
-
-                            appendFooter(indents.constructor)
+                        allProperties.forEach { (annotations, type, property, isOverride) ->
+                            appendProperty(
+                                name = property.name,
+                                type = type,
+                                formatType = { type.format(annotations) },
+                                annotations = annotations,
+                                indent = indents.constructorProperty,
+                                isOverride = isOverride,
+                                isSealedSuperclass = isSealedSuperclass
+                            )
                         }
 
-                    appendFooter(sealedSuperclass, sealedSubclasses)
-                }.trim()
-            } else {
-                // No properties to export -> class can be skipped
-                null
-            }
+                        appendFooter(indents.constructor)
+                    }
+
+                appendFooter(sealedSuperclass, sealedSubclasses)
+            }.trim()
         }
+    }
+
+    /**
+     * Classes of the same sealed hierarchy (sealed parent and sealed subclasses) that has to be generated
+     * together with [this] class, otherwise the output would reference missing types.
+     */
+    protected val KClass<*>.sealedRelatives: List<KClass<*>>
+        get() = listOfNotNull(sealedSuperclass) + exportableSealedSubclasses
+
+    private val KClass<*>.sealedSuperclass: KClass<*>?
+        get() {
+            val rawSealedSuperclasses = superclasses.filter { it.isSealed }
+            if (rawSealedSuperclasses.size > 1 || (rawSealedSuperclasses.isNotEmpty() && isSealed)) {
+                throw IllegalStateException("Only one sealed parent is allowed")
+            }
+            return rawSealedSuperclasses.firstOrNull()
+        }
+
+    private val KClass<*>.exportableSealedSubclasses: List<KClass<*>>
+        get() = sealedSubclasses.filter { subclass -> subclass.annotations.none { it is GeneratorIgnore } }
+
+    private fun KProperty1<*, *>.toTempProperty(klass: KClass<*>, isOverride: Boolean): TempProperty? {
+        val annotations = getAnnotations(klass)
+        if (annotations.any { it is GeneratorIgnore }) return null
+
+        return TempProperty(
+            annotations = annotationProcessors.map { it.process(annotations, klass) }.flatten().merge(),
+            localType = returnType.localType,
+            property = this,
+            isOverride = isOverride
+        )
     }
 
     /**
