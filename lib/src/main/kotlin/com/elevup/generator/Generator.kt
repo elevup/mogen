@@ -143,6 +143,8 @@ abstract class Generator(
      */
     protected fun generateClass(klass: KClass<*>): String? {
         if (klass.annotations.any { it is GeneratorIgnore }) return null
+        // Optional wrappers are unwrapped in place, neither they nor their subclasses (e.g. `Optional.Some<T>`) are generated
+        if (klass in optionalWrappers || klass.allSuperclasses.any { it in optionalWrappers }) return null
         if (klass.safeObjectInstance != null && klass.sealedSuperclass == null) return null
 
         return with(classGenerator) {

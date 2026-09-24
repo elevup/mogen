@@ -274,4 +274,29 @@ class TypescriptTests : StringSpec({
             )
         )
     }
+
+    "optional wrapper classes are not generated" {
+        getGenerator()
+            .appendOptionalWrapper(Optional::class)
+            .appendClasses(listOf(Optional::class, Optional.Some::class, Optional.None::class))
+            .appendAndExpectOutput(
+                clazz = PatchFormRequest::class,
+                classes = Types(
+                    """
+                    export interface DataClass {
+                      id: number;
+                      name?: string;
+                    }
+                    """.trimIndent(),
+                    """
+                    export interface PatchFormRequest {
+                      address?: DataClass | null;
+                      cin?: string | null;
+                      tags?: string[];
+                      zip?: string;
+                    }
+                    """.trimIndent()
+                )
+            )
+    }
 })
