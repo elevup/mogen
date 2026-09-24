@@ -26,6 +26,19 @@ abstract class Generator(
     private val typealiasGenerator: TypealiasComposer,
     private val constructorGenerator: ConstructorComposer? = null,
 ) {
+    /**
+     * Classes with single type argument that are converted to [Type.Optional], see [registerOptionalWrapper]
+     */
+    private val optionalWrappers: MutableSet<KClass<*>> = mutableSetOf()
+
+    /**
+     * Registers [klass] as optional wrapper. Wrapper itself is not generated, property `Wrapper<T>` is generated
+     * as property of type `T` that may be omitted.
+     */
+    protected fun registerOptionalWrapper(klass: KClass<*>) {
+        require(klass.typeParameters.size == 1) { "Optional wrapper must have exactly one type parameter" }
+        optionalWrappers += klass
+    }
 
     /**
      * Converts Kotlin's type to local [Type] suitable for code generation
@@ -35,7 +48,9 @@ abstract class Generator(
             val alias = getTypealias()
             val classifier = classifier
 
-            return if (alias != null) {
+            return if (classifier in optionalWrappers) {
+                Type.Optional(arguments.singleOrNull()?.type?.localType ?: Type.Any)
+            } else if (alias != null) {
                 onTypealias(alias, this)
                 Type.Reference(alias, nullable = isMarkedNullable)
             } else if (classifier?.primitiveType != null) {

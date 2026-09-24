@@ -43,6 +43,7 @@ class SwiftClassComposer(
             "min: ${annotations.min}".takeIf { annotations.min != null },
             "max: ${annotations.max}".takeIf { annotations.max != null },
             "regex: ${annotations.regex}".takeIf { annotations.regex != null },
+            type.optionalComment(),
         ).joinToString(separator = "\n")
             .takeIf { it.isNotBlank() }
             ?.wrapIntoComment()
@@ -59,6 +60,12 @@ class SwiftClassComposer(
         } else {
             appendLine("let $realName: ${formatType(type)}", indent)
         }
+    }
+
+    private fun Type.optionalComment(): String? = when {
+        this !is Type.Optional -> null
+        type.nullable -> "optional: nil = omitted, .some(nil) = null"
+        else -> "optional: nil = omitted"
     }
 
     override fun StringBuilder.appendFooter(sealedSuperclass: String?, sealedSubclasses: List<String>) {

@@ -40,6 +40,9 @@ class SwiftGenerator(
             }
         }
 
+        // outer `?` = omitted, inner `?` = null
+        is Type.Optional -> "${type.format()}?"
+
         is Type.Primitive -> {
             if (nullable) {
                 "$name?"

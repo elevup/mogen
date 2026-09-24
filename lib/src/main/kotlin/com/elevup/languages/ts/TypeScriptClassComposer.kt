@@ -34,7 +34,7 @@ class TypeScriptClassComposer(
         if (isOverride) return
 
         val tempName = annotations.fieldName ?: name
-        val realName = if (type.nullable) {
+        val realName = if (type.nullable || type is Type.Optional) {
             "$tempName?"
         } else {
             tempName

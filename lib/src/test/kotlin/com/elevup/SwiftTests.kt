@@ -212,4 +212,38 @@ class SwiftTests : StringSpec({
             )
         )
     }
+
+    "optional wrapper" {
+        getGenerator().appendOptionalWrapper(Optional::class).appendAndExpectOutput(
+            clazz = PatchFormRequest::class,
+            classes = Types(
+                """
+                struct DataClass: Codable {
+                  let id: Int
+                  let name: String?
+                }
+                """.trimIndent(),
+                """
+                struct PatchFormRequest: Codable {
+                  /**
+                   * optional: nil = omitted, .some(nil) = null
+                   */
+                  let address: DataClass??
+                  /**
+                   * optional: nil = omitted, .some(nil) = null
+                   */
+                  let cin: String??
+                  /**
+                   * optional: nil = omitted
+                   */
+                  let tags: [String]?
+                  /**
+                   * optional: nil = omitted
+                   */
+                  let zip: String?
+                }
+                """.trimIndent(),
+            )
+        )
+    }
 })

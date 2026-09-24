@@ -39,6 +39,9 @@ class DartGenerator(
                 "Map<String, ${valueType.format()}>"
             }
         }
+        // Dart cannot distinguish omitted and null
+        is Type.Optional -> if (type.nullable || type == Type.Any) type.format() else "${type.format()}?"
+
         is Type.Primitive -> {
             if (nullable) {
                 "$name?"

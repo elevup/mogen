@@ -45,6 +45,7 @@ class DartClassComposer(
             "min: ${annotations.min}".takeIf { annotations.min != null },
             "max: ${annotations.max}".takeIf { annotations.max != null },
             "regex: ${annotations.regex}".takeIf { annotations.regex != null },
+            type.optionalComment(),
             annotations.deprecated?.dartDeprecated()
         ).joinToString(separator = "\n")
             .takeIf { it.isNotBlank() }
@@ -54,6 +55,12 @@ class DartClassComposer(
             }
 
         appendLine("final ${formatType(type)} $realName;", indent)
+    }
+
+    private fun Type.optionalComment(): String? = when {
+        this !is Type.Optional -> null
+        type.nullable -> "optional: may be omitted, omitted and null are different states"
+        else -> "optional: may be omitted"
     }
 
     override fun StringBuilder.appendFooter(

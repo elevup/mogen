@@ -65,6 +65,16 @@ abstract class CachedGenerator(
     }
 
     /**
+     * Registers optional wrapper class (e.g. `sealed interface Optional<out T>`) used to distinguish omitted
+     * property from `null` value. Property `Optional<T>` is generated as property of type `T` that may be omitted,
+     * wrapper class itself is not generated.
+     */
+    fun appendOptionalWrapper(klass: KClass<*>): CachedGenerator {
+        registerOptionalWrapper(klass)
+        return this
+    }
+
+    /**
      * Generates code for given type
      */
     fun appendTypeAlias(alias: Typealias): CachedGenerator {

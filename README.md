@@ -27,12 +27,13 @@ Supported features:
  - classes - all public properties are transformed,
  - nested classes,
  - maps with `String` keys - maps with any other key type are converted to "any" type (JSON allows only string keys),
+ - optional wrappers - distinguish omitted property from `null` (e.g. PATCH requests),
  - sealed classes/interfaces - one level of sealed hierarchy (a class can have at most one sealed parent),
  - type aliases - only trivial cases, for example `typealias UserId = Long`.
 
 Unsupported features:
  - maps with non-`String` keys,
- - generics,
+ - generics (except registered optional wrappers),
  - inheritance (other than sealed hierarchies),
  - abstract classes,
  - packages (= output is supposed to be printed into one file).
@@ -143,6 +144,50 @@ export interface ClassWithMaps {
   stringLong: Record<string, number>;
 }
 ```
+
+### Optional wrappers (PATCH)
+In PATCH requests backend needs to know whether a property was omitted (= keep current value) or explicitly set
+to `null` (= clear the value). This is typically modelled by a wrapper:
+
+```kotlin
+sealed interface Optional<out T> {
+    data class Some<out T>(val value: T) : Optional<T>
+    data object None : Optional<Nothing>
+}
+```
+
+Register the wrapper and Mogen generates property of type `T` that may be omitted. The wrapper itself is not
+generated, (de)serialization (`None` = omitted, `Some(x)` = `x`) is up to you.
+
+```kotlin
+TypeScriptGenerator()
+    .appendOptionalWrapper(Optional::class)
+    .appendClass(PatchFormRequest::class)
+```
+
+Input (Kotlin):
+```kotlin
+data class PatchFormRequest(
+    val cin: Optional<String?>,
+    val zip: Optional<String>,
+)
+```
+
+Output:
+
+| Language   | `cin: Optional<String?>`             | `zip: Optional<String>`       |
+|------------|--------------------------------------|-------------------------------|
+| TypeScript | `cin?: string \| null;`              | `zip?: string;`               |
+| Swift      | `let cin: String??`                  | `let zip: String?`            |
+| Dart       | `final String? cin;`                 | `final String? zip;`          |
+| OpenApi    | `type: string`, `nullable: true`     | `type: string`, `nullable: false` |
+
+- TypeScript: omitted = `undefined`, `null` = `null`.
+- Swift: outer `nil` = omitted, `.some(nil)` = `null`. Synthesized `Codable` does not distinguish them, custom decoding
+  is needed.
+- Dart cannot express the difference in type, so the property is nullable, not `required` in constructor and
+  documented by a comment.
+- OpenApi: omitted = property is not required.
 
 ### Sealed classes
 Sealed classes and interfaces are converted to a parent type and its subtypes. Appending any class of the hierarchy

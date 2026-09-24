@@ -339,4 +339,52 @@ class DartTests : StringSpec({
             )
         )
     }
+
+    "optional wrapper" {
+        getGenerator().appendOptionalWrapper(Optional::class).appendAndExpectOutput(
+            clazz = PatchFormRequest::class,
+            classes = Types(
+                """
+                class DataClass {
+                  final int id;
+                  final String? name;
+
+                  DataClass({
+                    required this.id,
+                    required this.name,
+                  });
+
+                }
+                """.trimIndent(),
+                """
+                class PatchFormRequest {
+                  /**
+                   * optional: may be omitted, omitted and null are different states
+                   */
+                  final DataClass? address;
+                  /**
+                   * optional: may be omitted, omitted and null are different states
+                   */
+                  final String? cin;
+                  /**
+                   * optional: may be omitted
+                   */
+                  final List<String>? tags;
+                  /**
+                   * optional: may be omitted
+                   */
+                  final String? zip;
+
+                  PatchFormRequest({
+                    this.address,
+                    this.cin,
+                    this.tags,
+                    this.zip,
+                  });
+
+                }
+                """.trimIndent(),
+            )
+        )
+    }
 })

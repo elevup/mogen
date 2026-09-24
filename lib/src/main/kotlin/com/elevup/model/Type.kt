@@ -45,6 +45,16 @@ sealed class Type(
     ) : Type(nullable)
 
     /**
+     * Property that may be omitted (= `undefined`) which is a different state than `null`.
+     * Created from classes registered as optional wrappers, e.g. `Optional<String?>` used in PATCH requests.
+     *
+     * @param type - type of the value when present, can be nullable
+     */
+    data class Optional(
+        val type: Type,
+    ) : Type(false)
+
+    /**
      * Super-type of the universe - Java's Object, Kotlin's Any
      */
     object Any : Type(false)

@@ -39,6 +39,9 @@ class OpenApiClassComposer(
         val propertyCode = buildString {
             val realName = annotations.fieldName ?: name
 
+            // Omitted property is expressed by not being required, value itself is described by the inner type
+            val type = (type as? Type.Optional)?.type ?: type
+
             if (type is Type.Any) {
                 appendLine("$realName: {}")
             } else {

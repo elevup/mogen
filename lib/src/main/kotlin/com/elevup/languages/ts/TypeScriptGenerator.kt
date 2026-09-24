@@ -40,6 +40,7 @@ class TypeScriptGenerator(
             }
         }
 
+        is Type.Optional -> if (type.nullable) "${type.format()} | null" else type.format()
         is Type.Primitive -> name
         is Type.Reference -> config.formatName(name)
         Type.Any -> "any"

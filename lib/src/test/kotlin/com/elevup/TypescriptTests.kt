@@ -252,4 +252,26 @@ class TypescriptTests : StringSpec({
             )
         )
     }
+
+    "optional wrapper" {
+        getGenerator().appendOptionalWrapper(Optional::class).appendAndExpectOutput(
+            clazz = PatchFormRequest::class,
+            classes = Types(
+                """
+                export interface DataClass {
+                  id: number;
+                  name?: string;
+                }
+                """.trimIndent(),
+                """
+                export interface PatchFormRequest {
+                  address?: DataClass | null;
+                  cin?: string | null;
+                  tags?: string[];
+                  zip?: string;
+                }
+                """.trimIndent(),
+            )
+        )
+    }
 })

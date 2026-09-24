@@ -365,4 +365,45 @@ class OpenApiTests : StringSpec({
             )
         )
     }
+
+    "optional wrapper" {
+        getGenerator().appendOptionalWrapper(Optional::class).appendAndExpectOutput(
+            clazz = PatchFormRequest::class,
+            classes = Types(
+                """
+                DataClass:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      format: int64
+                      nullable: false
+                    name:
+                      type: string
+                      nullable: true
+                """.trimIndent(),
+                """
+                PatchFormRequest:
+                  type: object
+                  properties:
+                    address:
+                      nullable: true
+                      allOf:
+                       - ${dollar}ref: '#/components/schemas/DataClass'
+                    cin:
+                      type: string
+                      nullable: true
+                    tags:
+                      type: array
+                      nullable: false
+                      items:
+                        type: string
+                        nullable: false
+                    zip:
+                      type: string
+                      nullable: false
+                """.trimIndent(),
+            )
+        )
+    }
 })

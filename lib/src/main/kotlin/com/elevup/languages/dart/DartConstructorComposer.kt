@@ -25,7 +25,8 @@ class DartConstructorComposer(
         isSealedSuperclass: Boolean
     ) {
         val realName = annotations.fieldName ?: name
-        appendLine("required ${if (isOverride) "super" else "this"}.$realName,", indent)
+        val required = if (type is Type.Optional) "" else "required "
+        appendLine("$required${if (isOverride) "super" else "this"}.$realName,", indent)
 
     }
 

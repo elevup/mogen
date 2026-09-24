@@ -35,6 +35,8 @@ class OpenApiGenerator(
                 }
             }
 
+            is Type.Optional -> append(type.format(annotations))
+
             is Type.Map -> {
                 val valueType = valueType?.localType ?: Type.Any
                 appendLine("type: object")
